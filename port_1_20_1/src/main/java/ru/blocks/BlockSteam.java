@@ -4,6 +4,7 @@ import ru.stalcraft.AnomalyDrop;
 import ru.stalcraft.Config;
 import ru.stalcraft.StalkerDamage;
 import ru.stalcraft.StalkerMain;
+import ru.stalcraft.sound.StalkerSounds;
 import ru.stalcraft.tile.TileEntityAnomaly;
 import ru.stalcraft.tile.TileEntitySteam;
 
@@ -17,6 +18,7 @@ public class BlockSteam extends BlockAnomaly {
          TileEntitySteam par6 = (TileEntitySteam)par1.r(par2, par3, par4);
          if (par6.tickTile % 25 == 0) {
             TileEntityAnomaly.damageEntityForce((of)par5Entity, StalkerDamage.steam, Config.steamDamage, true);
+            par1.a(par5Entity, StalkerSounds.STEAM_HIT, 1.0F, 1.0F);
          }
 
          par6.tickTile++;
