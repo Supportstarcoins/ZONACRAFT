@@ -11,6 +11,7 @@ import ru.stalcraft.client.network.ClientPacketSender;
 import ru.stalcraft.client.particles.ElectraParticleEmitter;
 import ru.stalcraft.entity.EntityElectraLight;
 import ru.stalcraft.items.EntityBolt;
+import ru.stalcraft.sound.StalkerSounds;
 
 public class TileEntityElectra extends TileEntityExtendedAnomaly {
    public List<ParticleDisk> particleDisk = new ArrayList<>();
@@ -46,7 +47,7 @@ public class TileEntityElectra extends TileEntityExtendedAnomaly {
                ((ElectraParticleEmitter)super.particleEmitter).setSplash();
                float var10002 = super.l + 0.5F;
                float var10003 = super.m + 0.5F;
-               atv.w().v.a("stalker:electra_hit", var10002, var10003, super.n + 0.5F, 1.0F, 1.0F);
+               atv.w().v.a(StalkerSounds.ELECTRA_HIT, var10002, var10003, super.n + 0.5F, 1.0F, 1.0F);
                if (this.ticksSleep <= 0 && GuiSettingsStalker.dynamicLights) {
                   EntityElectraLight entityLight = new EntityElectraLight(this);
                   atv.w().f.d(entityLight);

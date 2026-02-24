@@ -1,0 +1,22 @@
+{
+  "electra": {
+    "sounds": [
+      "stalker:electra"
+    ]
+  },
+  "electra_hit": {
+    "sounds": [
+      "stalker:electra_hit"
+    ]
+  },
+  "steam": {
+    "sounds": [
+      "stalker:steam"
+    ]
+  },
+  "steam_hit": {
+    "sounds": [
+      "stalker:steam_hit"
+    ]
+  }
+}
