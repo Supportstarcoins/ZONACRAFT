@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "stalker:block/anomaly_debug_block" }
+  }
+}

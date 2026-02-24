@@ -1,3 +1,6 @@
 {
-  "pack": {"pack_format": 15, "description": "ZONACRAFT template resources"}
+  "pack": {
+    "pack_format": 15,
+    "description": "ZONACRAFT legacy assets for Forge 1.20.1 incremental port"
+  }
 }
