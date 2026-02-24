@@ -1,5 +1,29 @@
+# Gradle / Forge
 .gradle/
 build/
+out/
 run/
+
+# Logs / crashes
 logs/
 *.log
+crash-reports/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Java crash dumps
+hs_err_pid*
+replay_pid*
+
+# Minecraft runtime junk (если случайно попадёт в проект)
+saves/
+resourcepacks/
+shaderpacks/
+mods/

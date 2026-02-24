@@ -1,0 +1,2 @@
+/* PLACEHOLDER: replace with real Forge 1.20.1 build.gradle */
+plugins { id 'java' }

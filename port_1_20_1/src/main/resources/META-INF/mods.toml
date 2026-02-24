@@ -1,0 +1,7 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+[[mods]]
+modId="stalker_port"
+version="0.0.1"
+displayName="ZONACRAFT Port (Template)"

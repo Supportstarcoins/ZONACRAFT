@@ -1,0 +1,41 @@
+# Blender MTL File: 'lep_no_base.obj'
+# Material Count: 3
+
+newmtl Material_2
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\berku\Desktop\lep1_a.png
+map_Bump concrete_broken_0_nm.tga
+map_Ka concrete_broken_0.tga
+
+newmtl Material_2_concrete_broken_0.dds
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\berku\Desktop\concrete_broken_0.png
+map_Bump concrete_broken_0_nm.tga
+map_Ka concrete_broken_0.tga
+
+newmtl Material_2_Без_имени-1.png
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\berku\Desktop\Без имени-1.png
+map_Bump concrete_broken_0_nm.tga
+map_Ka concrete_broken_0.tga

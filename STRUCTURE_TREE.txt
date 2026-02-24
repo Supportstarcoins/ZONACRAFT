@@ -1,0 +1,22 @@
+ZONACRAFT/
+├─ .gitignore
+├─ README.md
+├─ AGENTS.md
+├─ backup/
+├─ docs/
+│  └─ PORTING_NOTES.md
+└─ port_1_20_1/
+   ├─ build.gradle
+   ├─ settings.gradle
+   ├─ gradle.properties
+   ├─ gradlew
+   ├─ gradlew.bat
+   ├─ gradle/wrapper/
+   └─ src/main/
+      ├─ java/ru/
+      └─ resources/
+         ├─ META-INF/mods.toml
+         ├─ pack.mcmeta
+         ├─ assets/stalker/
+         ├─ assets/stalker_port/{blockstates,models,textures,particles,lang}
+         └─ data/stalker_port/
