@@ -1,7 +1,27 @@
-modLoader="javafml"
-loaderVersion="[47,)"
-license="All Rights Reserved"
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "All Rights Reserved"
+issueTrackerURL = "https://example.invalid/zonacraft"
+
 [[mods]]
-modId="stalker_port"
-version="0.0.1"
-displayName="ZONACRAFT Port (Template)"
+modId = "stalker"
+version = "${file.jarVersion}"
+displayName = "ZONACRAFT Port"
+authors = "ZONACRAFT Team"
+description = '''
+Incremental Forge 1.20.1 port of legacy ZONACRAFT content.
+'''
+
+[[dependencies.stalker]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.stalker]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,1.21)"
+ordering = "NONE"
+side = "BOTH"
