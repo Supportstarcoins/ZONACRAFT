@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "stalker_port:block/lighter"
+    "all": "stalker_port:block/lighter_active"
   }
 }

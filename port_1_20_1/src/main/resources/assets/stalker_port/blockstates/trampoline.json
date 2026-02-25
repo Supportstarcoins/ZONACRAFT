@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "active=false": {
       "model": "stalker_port:block/trampoline"
+    },
+    "active=true": {
+      "model": "stalker_port:block/trampoline_active"
     }
   }
 }

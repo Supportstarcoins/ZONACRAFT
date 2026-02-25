@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -17,14 +17,14 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import ru.stalcraft.port.anomaly.BaseAnomalyBlock;
 import ru.stalcraft.port.registry.ModBlockEntities;
+import ru.stalcraft.port.registry.ModSounds;
 
 public class BaseAnomalyBlockEntity extends BlockEntity {
     private int cooldownTicks;
@@ -72,7 +72,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
 
         if (triggerAttempt && be.cooldownTicks <= 0) {
             for (LivingEntity entity : entities) {
-                if (entity.position().distanceTo(center) <= type.triggerDistance()) {
+                if (entity.position().distanceTo(center) <= type.triggerDistance() && canTriggerEntity(level, entity, type)) {
                     be.trigger(level, pos, state, entity, type, center);
                     break;
                 }
@@ -107,6 +107,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
     private void trigger(Level level, BlockPos pos, BlockState state, LivingEntity entity, AnomalyType type, Vec3 center) {
         this.cooldownTicks = type.cooldownTicks();
         this.activeTicks = type.activeTicks();
+        setEntityCooldown(level, entity, type, type.cooldownTicks() / 2 + 6);
 
         switch (type) {
             case ELECTRA -> triggerElectra(level, entity, center, type);
@@ -118,10 +119,14 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
 
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D);
-            level.playSound(null, pos, resolveTriggerSound(type), SoundSource.BLOCKS, 0.9F, 0.9F + level.random.nextFloat() * 0.2F);
+            level.playSound(null, pos, resolveActivateSound(type), SoundSource.BLOCKS, 0.9F, 0.9F + level.random.nextFloat() * 0.2F);
         }
 
-        AnomalyFxDispatcher.spawnTrigger(level, pos, type, this.fxSeed);
+        AnomalyFxDispatcher.spawnActivate(level, pos, type, this.fxSeed);
+        AnomalyFxDispatcher.spawnHit(level, pos, type, this.fxSeed);
+        if (type == AnomalyType.BLACK_HOLE || type == AnomalyType.TRAMPOLINE) {
+            AnomalyFxDispatcher.spawnSplash(level, pos, type, this.fxSeed);
+        }
         setChanged();
     }
 
@@ -152,14 +157,6 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
     }
 
     private static void triggerTrampoline(LivingEntity entity, AnomalyType type) {
-        long now = entity.level().getGameTime();
-        CompoundTag data = entity.getPersistentData();
-        long nextAllowedTick = data.getLong("stalker_port_trampoline_cd");
-        if (now < nextAllowedTick) {
-            return;
-        }
-
-        data.putLong("stalker_port_trampoline_cd", now + 8L);
         Vec3 velocity = entity.getDeltaMovement();
         entity.setDeltaMovement(velocity.x * 0.6D, Math.max(type.verticalForce(), velocity.y + type.verticalForce()), velocity.z * 0.6D);
         entity.fallDistance = 0.0F;
@@ -180,13 +177,23 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         entity.hasImpulse = true;
     }
 
-    private static net.minecraft.sounds.SoundEvent resolveTriggerSound(AnomalyType type) {
+    private static boolean canTriggerEntity(Level level, LivingEntity entity, AnomalyType type) {
+        String key = "stalker_port.anomaly_cd." + type.name().toLowerCase();
+        return level.getGameTime() >= entity.getPersistentData().getLong(key);
+    }
+
+    private static void setEntityCooldown(Level level, LivingEntity entity, AnomalyType type, int ticks) {
+        String key = "stalker_port.anomaly_cd." + type.name().toLowerCase();
+        entity.getPersistentData().putLong(key, level.getGameTime() + ticks);
+    }
+
+    private static SoundEvent resolveActivateSound(AnomalyType type) {
         return switch (type) {
-            case ELECTRA -> SoundEvents.LIGHTNING_BOLT_THUNDER;
-            case BLACK_HOLE -> SoundEvents.END_PORTAL_SPAWN;
-            case TRAMPOLINE -> SoundEvents.SLIME_JUMP;
-            case LIGHTER -> SoundEvents.FIRECHARGE_USE;
-            case CAROUSEL -> SoundEvents.PLAYER_ATTACK_SWEEP;
+            case ELECTRA -> ModSounds.ELECTRA_ACTIVATE.get();
+            case BLACK_HOLE -> ModSounds.BLACK_HOLE_ACTIVATE.get();
+            case TRAMPOLINE -> ModSounds.TRAMPOLINE_ACTIVATE.get();
+            case LIGHTER -> ModSounds.LIGHTER_ACTIVATE.get();
+            case CAROUSEL -> ModSounds.CAROUSEL_ACTIVATE.get();
         };
     }
 
