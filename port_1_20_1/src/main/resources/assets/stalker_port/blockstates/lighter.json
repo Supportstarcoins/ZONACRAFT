@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "stalker_port:block/lighter"
+    },
+    "active=true": {
+      "model": "stalker_port:block/lighter_active"
+    }
+  }
+}
