@@ -184,9 +184,9 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         return switch (type) {
             case ELECTRA -> SoundEvents.LIGHTNING_BOLT_THUNDER;
             case BLACK_HOLE -> SoundEvents.END_PORTAL_SPAWN;
-            case TRAMPOLINE -> SoundEvents.SLIME_BLOCK_JUMP;
+            case TRAMPOLINE -> SoundEvents.SLIME_JUMP;
             case LIGHTER -> SoundEvents.FIRECHARGE_USE;
-            case CAROUSEL -> SoundEvents.BREEZE_WIND_BURST;
+            case CAROUSEL -> SoundEvents.PLAYER_ATTACK_SWEEP;
         };
     }
 

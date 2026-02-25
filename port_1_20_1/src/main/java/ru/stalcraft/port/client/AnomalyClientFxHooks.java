@@ -73,7 +73,7 @@ public final class AnomalyClientFxHooks {
         return switch (type) {
             case ELECTRA -> SoundEvents.LIGHTNING_BOLT_IMPACT;
             case BLACK_HOLE -> SoundEvents.ENDERMAN_STARE;
-            case TRAMPOLINE -> SoundEvents.SLIME_BLOCK_JUMP;
+            case TRAMPOLINE -> SoundEvents.SLIME_JUMP;
             case LIGHTER -> SoundEvents.BLAZE_SHOOT;
             case CAROUSEL -> SoundEvents.PLAYER_ATTACK_SWEEP;
         };
