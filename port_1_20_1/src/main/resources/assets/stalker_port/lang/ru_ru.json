@@ -1,0 +1,16 @@
+{
+  "itemGroup.stalker_port": "Stalker Port",
+  "block.stalker_port.electra": "Электра (порт)",
+  "block.stalker_port.steam": "Паровая аномалия (порт)",
+  "block.stalker_port.trampoline": "Трамплин (порт)",
+  "block.stalker_port.funnel": "Воронка (порт)",
+  "block.stalker_port.carousel": "Карусель (порт)",
+  "block.stalker_port.coach": "Пружина/Кочерга (порт)",
+  "block.stalker_port.lighter": "Жарка/Лайтер (порт)",
+  "block.stalker_port.kissel": "Кисель (порт)",
+  "block.stalker_port.respawn_point": "Точка сохранения (порт)",
+  "block.stalker_port.machine_gun": "Пулемет (порт)",
+  "block.stalker_port.flag": "Флаг (порт)",
+  "block.stalker_port.base_warehouse": "Блок склад базы (порт)",
+  "item.stalker_port.kissel_bucket": "Ведро киселя (порт)"
+}

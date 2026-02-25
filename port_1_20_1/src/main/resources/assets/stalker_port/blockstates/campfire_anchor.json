@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "stalker_port:block/campfire_anchor"
+    }
+  }
+}
