@@ -10,6 +10,7 @@ import ru.stalcraft.port.registry.ModBlockEntities;
 import ru.stalcraft.port.registry.ModBlocks;
 import ru.stalcraft.port.registry.ModCreativeTabs;
 import ru.stalcraft.port.registry.ModItems;
+import ru.stalcraft.port.registry.ModParticles;
 import ru.stalcraft.port.registry.ModSounds;
 
 @Mod(StalkerPortMod.MODID)
@@ -22,6 +23,7 @@ public class StalkerPortMod {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModItems.register(modEventBus);
+        ModParticles.register(modEventBus);
         ModSounds.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
 

@@ -4,11 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
+import ru.stalcraft.port.registry.ModParticles;
 
 public final class AnomalyFxDispatcher {
     private static final String CLIENT_HOOK_CLASS = "ru.stalcraft.port.client.AnomalyClientFxHooks";
@@ -53,9 +53,12 @@ public final class AnomalyFxDispatcher {
         }
 
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(type == AnomalyType.LIGHTER ? ParticleTypes.FLAME : ParticleTypes.BUBBLE,
-                pos.getX() + 0.5D, pos.getY() + 0.45D, pos.getZ() + 0.5D,
-                16, 0.8D, 0.6D, 0.8D, 0.02D);
+            ParticleOptions particle = ModParticles.get(type == AnomalyType.LIGHTER ? "lighter/distortion" : "bubble").orElse(null);
+            if (particle != null) {
+                serverLevel.sendParticles(particle,
+                    pos.getX() + 0.5D, pos.getY() + 0.45D, pos.getZ() + 0.5D,
+                    16, 0.8D, 0.6D, 0.8D, 0.02D);
+            }
         }
     }
 
@@ -64,13 +67,17 @@ public final class AnomalyFxDispatcher {
             return;
         }
 
-        ParticleOptions particle = switch (type) {
-            case ELECTRA -> activate ? ParticleTypes.ELECTRIC_SPARK : ParticleTypes.CRIT;
-            case BLACK_HOLE -> activate ? ParticleTypes.REVERSE_PORTAL : ParticleTypes.SMOKE;
-            case TRAMPOLINE -> activate ? ParticleTypes.POOF : ParticleTypes.SPLASH;
-            case LIGHTER -> activate ? ParticleTypes.LAVA : ParticleTypes.SMALL_FLAME;
-            case CAROUSEL -> activate ? ParticleTypes.CRIT : ParticleTypes.ENCHANT;
-        };
+        ParticleOptions particle = ModParticles.get(switch (type) {
+            case ELECTRA -> "electra/active";
+            case BLACK_HOLE -> activate ? "funnel/funnel_eye" : "funnel/distortion";
+            case TRAMPOLINE -> activate ? "trampoline/distortion" : "trampoline/idle";
+            case LIGHTER -> "lighter/distortion";
+            case CAROUSEL -> "bolt_distortion";
+        }).orElse(null);
+
+        if (particle == null) {
+            return;
+        }
 
         int count = activate ? 18 : 8;
         double spread = activate ? 0.55D : 0.35D;

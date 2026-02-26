@@ -33,7 +33,8 @@ public class BaseAnomalyBlock extends BaseEntityBlock {
             .mapColor(MapColor.COLOR_PURPLE)
             .strength(1.5F, 6.0F)
             .sound(SoundType.GLASS)
-            .noOcclusion());
+            .noOcclusion()
+            .noCollission());
         this.anomalyType = anomalyType;
         this.registerDefaultState(this.stateDefinition.any().setValue(ACTIVE, false));
     }
@@ -49,7 +50,7 @@ public class BaseAnomalyBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override
@@ -67,7 +68,7 @@ public class BaseAnomalyBlock extends BaseEntityBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide) {
-            return null;
+            return createTickerHelper(type, ModBlockEntities.ANOMALY.get(), BaseAnomalyBlockEntity::clientTick);
         }
 
         return createTickerHelper(type, ModBlockEntities.ANOMALY.get(), BaseAnomalyBlockEntity::serverTick);

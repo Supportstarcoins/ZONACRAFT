@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -12,6 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import ru.stalcraft.port.StalkerPortMod;
 import ru.stalcraft.port.anomaly.AnomalyType;
+import ru.stalcraft.port.registry.ModParticles;
 import ru.stalcraft.port.registry.ModSounds;
 
 public final class AnomalyClientFxHooks {
@@ -40,20 +40,19 @@ public final class AnomalyClientFxHooks {
         if (type == AnomalyType.ELECTRA && !active && animationTick % 4 == 0) {
             double x = signedOffset(random);
             double z = signedOffset(random);
-            add(level, ParticleTypes.ELECTRIC_SPARK, pos, 0.5D + x, 0.7D, 0.5D + z, 0.0D, 0.02D, 0.0D);
-            add(level, ParticleTypes.END_ROD, pos, 0.5D + x, 0.7D, 0.5D + z, 0.0D, 0.01D, 0.0D);
-            logFx("ambient", type, 2, level, pos);
+            add(level, pick(random, "electra/idle", "electra/overlay"), pos, 0.5D + x, 0.7D, 0.5D + z, 0.0D, 0.02D, 0.0D);
+            logFx("ambient", type, 1, level, pos);
         }
         if (type == AnomalyType.LIGHTER) {
             if (active) {
                 for (int i = 0; i < 12; i++) {
-                    add(level, ParticleTypes.FLAME, pos, 0.5D + (random.nextDouble() - 0.5D) * 0.4D,
+                    add(level, "lighter/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 0.4D,
                         0.25D + random.nextDouble() * 0.2D, 0.5D + (random.nextDouble() - 0.5D) * 0.4D,
                         0.0D, 0.02D + random.nextDouble() * 0.03D, 0.0D);
                 }
                 logFx("ambient", type, 12, level, pos);
             } else if (animationTick % 3 == 0) {
-                add(level, ParticleTypes.SMALL_FLAME, pos, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
+                add(level, "lighter/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
                     0.28D, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
                     0.0D, 0.01D, 0.0D);
                 logFx("ambient", type, 1, level, pos);
@@ -85,12 +84,13 @@ public final class AnomalyClientFxHooks {
 
         for (int i = 0; i < particles; i++) {
             switch (type) {
-                case ELECTRA -> add(level, ParticleTypes.ELECTRIC_SPARK, pos, 0.5D + (random.nextDouble() - 0.5D),
+                case ELECTRA -> add(level, "electra/active", pos, 0.5D + (random.nextDouble() - 0.5D),
                     0.2D + random.nextDouble() * 0.9D, 0.5D + (random.nextDouble() - 0.5D), 0.0D, 0.03D, 0.0D);
-                case TRAMPOLINE -> add(level, ParticleTypes.POOF, pos, 0.5D + (random.nextDouble() - 0.5D) * 1.4D,
+                case TRAMPOLINE -> add(level, pick(random, "trampoline/distortion", "trampoline/idle"), pos,
+                    0.5D + (random.nextDouble() - 0.5D) * 1.4D,
                     0.05D + random.nextDouble() * 0.6D, 0.5D + (random.nextDouble() - 0.5D) * 1.4D,
                     (random.nextDouble() - 0.5D) * 0.03D, 0.06D + random.nextDouble() * 0.05D, (random.nextDouble() - 0.5D) * 0.03D);
-                case BLACK_HOLE -> add(level, ParticleTypes.SMOKE, pos, 0.5D + (random.nextDouble() - 0.5D) * 0.7D,
+                case BLACK_HOLE -> add(level, "funnel/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 0.7D,
                     0.1D + random.nextDouble() * 0.8D, 0.5D + (random.nextDouble() - 0.5D) * 0.7D, 0.0D, 0.03D, 0.0D);
                 case LIGHTER, CAROUSEL -> {
                 }
@@ -106,14 +106,14 @@ public final class AnomalyClientFxHooks {
 
     public static void spawnHit(Level level, BlockPos pos, AnomalyType type, long fxSeed) {
         RandomSource random = randomForTick(fxSeed, (int) level.getGameTime() + 31);
-        int count = type == AnomalyType.ELECTRA ? 8 : 8;
+        int count = 8;
         for (int i = 0; i < count; i++) {
             add(level, switch (type) {
-                case ELECTRA -> ParticleTypes.CRIT;
-                case BLACK_HOLE -> ParticleTypes.SMOKE;
-                case TRAMPOLINE -> ParticleTypes.SPLASH;
-                case LIGHTER -> ParticleTypes.SMALL_FLAME;
-                case CAROUSEL -> ParticleTypes.ENCHANT;
+                case ELECTRA -> "electra/active";
+                case BLACK_HOLE -> "funnel/distortion";
+                case TRAMPOLINE -> pick(random, "trampoline/distortion", "trampoline/idle");
+                case LIGHTER -> "lighter/distortion";
+                case CAROUSEL -> "bolt_distortion";
             }, pos,
                 0.5D + (random.nextDouble() - 0.5D) * 0.6D,
                 0.15D + random.nextDouble() * 0.4D,
@@ -129,7 +129,7 @@ public final class AnomalyClientFxHooks {
     public static void spawnSplash(Level level, BlockPos pos, AnomalyType type, long fxSeed) {
         RandomSource random = randomForTick(fxSeed, (int) level.getGameTime() + 79);
         for (int i = 0; i < 12; i++) {
-            add(level, type == AnomalyType.LIGHTER ? ParticleTypes.FLAME : ParticleTypes.BUBBLE, pos,
+            add(level, type == AnomalyType.LIGHTER ? "lighter/distortion" : "bubble", pos,
                 0.5D + (random.nextDouble() - 0.5D),
                 0.1D + random.nextDouble() * 0.9D,
                 0.5D + (random.nextDouble() - 0.5D),
@@ -157,19 +157,19 @@ public final class AnomalyClientFxHooks {
     }
 
     private static void spawnTrampolineLeaf(Level level, BlockPos pos, RandomSource random) {
-        add(level, ParticleTypes.CHERRY_LEAVES, pos, 0.5D + (random.nextDouble() - 0.5D) * 1.7D,
+        add(level, "trampoline/idle", pos, 0.5D + (random.nextDouble() - 0.5D) * 1.7D,
             0.35D + random.nextDouble() * 0.2D, 0.5D + (random.nextDouble() - 0.5D) * 1.7D,
             0.0D, 0.01D, 0.0D);
     }
 
     private static void spawnFunnelLeaf(Level level, BlockPos pos, RandomSource random) {
-        add(level, ParticleTypes.CHERRY_LEAVES, pos, 0.5D + (random.nextDouble() - 0.5D) * 2.3D,
+        add(level, "funnel/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 2.3D,
             0.2D + random.nextDouble() * 0.3D, 0.5D + (random.nextDouble() - 0.5D) * 2.3D,
             0.0D, 0.02D, 0.0D);
     }
 
     private static void spawnFunnelEye(Level level, BlockPos pos, RandomSource random) {
-        add(level, ParticleTypes.PORTAL, pos, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
+        add(level, "funnel/funnel_eye", pos, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
             0.85D, 0.5D + (random.nextDouble() - 0.5D) * 0.25D,
             0.0D, 0.01D, 0.0D);
         logFx("ambient", AnomalyType.BLACK_HOLE, 1, level, pos);
@@ -178,7 +178,7 @@ public final class AnomalyClientFxHooks {
     private static void spawnFunnelActivationCloud(Level level, BlockPos pos, RandomSource random, FxRuntimeState state) {
         int dustToSpawn = state.notSpawnedDust / 15 + state.notSpawnedDust % 15;
         for (int i = 0; i < dustToSpawn; i++) {
-            add(level, ParticleTypes.ASH, pos, 0.5D + (random.nextDouble() - 0.5D) * 2.0D,
+            add(level, "funnel/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 2.0D,
                 0.2D + random.nextDouble() * 1.0D, 0.5D + (random.nextDouble() - 0.5D) * 2.0D,
                 0.0D, 0.03D, 0.0D);
         }
@@ -194,9 +194,16 @@ public final class AnomalyClientFxHooks {
         logFx("activate", AnomalyType.BLACK_HOLE, dustToSpawn + leavesToSpawn, level, pos);
     }
 
-    private static void add(Level level, net.minecraft.core.particles.ParticleOptions type, BlockPos pos,
+    private static void add(Level level, String particleId, BlockPos pos,
         double xOff, double yOff, double zOff, double speedX, double speedY, double speedZ) {
-        level.addParticle(type, pos.getX() + xOff, pos.getY() + yOff, pos.getZ() + zOff, speedX, speedY, speedZ);
+        ModParticles.get(particleId).ifPresent(type -> {
+            level.addParticle(type, pos.getX() + xOff, pos.getY() + yOff, pos.getZ() + zOff, speedX, speedY, speedZ);
+            StalkerPortMod.LOGGER.info("FX spawn particle stalker_port:{}", particleId);
+        });
+    }
+
+    private static String pick(RandomSource random, String first, String second) {
+        return random.nextBoolean() ? first : second;
     }
 
     private static double signedOffset(RandomSource random) {
