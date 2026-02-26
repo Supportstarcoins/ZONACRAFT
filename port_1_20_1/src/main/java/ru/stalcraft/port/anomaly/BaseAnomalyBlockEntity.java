@@ -1,6 +1,9 @@
 package ru.stalcraft.port.anomaly;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import ru.stalcraft.port.StalkerPortMod;
 import ru.stalcraft.port.registry.ModBlockEntities;
 import ru.stalcraft.port.registry.ModSounds;
 
@@ -34,6 +38,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
     private boolean immediateCheckRequested;
     private String lastActivator = "";
     private int lastSyncedActiveTicks;
+    private final Map<UUID, Integer> entityCooldownTicks = new HashMap<>();
 
     public BaseAnomalyBlockEntity(BlockPos pos, BlockState state) {
         this(ModBlockEntities.ANOMALY.get(), pos, state);
@@ -52,9 +57,14 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         if (be.cooldownTicks > 0) {
             be.cooldownTicks--;
         }
+        be.tickEntityCooldowns();
 
         if (!(state.getBlock() instanceof BaseAnomalyBlock block)) {
             return;
+        }
+
+        if (be.animationTick % 40 == 0) {
+            StalkerPortMod.LOGGER.info("[ANOMALY] {} tick @{} cooldown={} active={}", block.anomalyType(), pos, be.cooldownTicks, be.activeTicks);
         }
 
         AnomalyType type = block.anomalyType();
@@ -62,6 +72,12 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         AABB searchBox = new AABB(center, center).inflate(type.radius());
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
             entity -> entity.isAlive() && !entity.isSpectator());
+
+        if (!entities.isEmpty() && be.animationTick % 10 == 0) {
+            for (LivingEntity entity : entities) {
+                StalkerPortMod.LOGGER.info("[ANOMALY] detect {} entity={} uuid={} @{}", type, entity.getType().toShortString(), entity.getUUID(), pos);
+            }
+        }
 
         if (type == AnomalyType.BLACK_HOLE) {
             applyBlackHolePull(entities, center, type);
@@ -72,7 +88,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
 
         if (triggerAttempt && be.cooldownTicks <= 0) {
             for (LivingEntity entity : entities) {
-                if (entity.position().distanceTo(center) <= type.triggerDistance() && canTriggerEntity(level, entity, type)) {
+                if (entity.position().distanceTo(center) <= type.triggerDistance() && be.canTriggerEntity(entity)) {
                     be.trigger(level, pos, state, entity, type, center);
                     break;
                 }
@@ -107,7 +123,8 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
     private void trigger(Level level, BlockPos pos, BlockState state, LivingEntity entity, AnomalyType type, Vec3 center) {
         this.cooldownTicks = type.cooldownTicks();
         this.activeTicks = type.activeTicks();
-        setEntityCooldown(level, entity, type, type.cooldownTicks() / 2 + 6);
+        this.lastActivator = entity.getUUID().toString();
+        this.entityCooldownTicks.put(entity.getUUID(), type.cooldownTicks() / 2 + 6);
 
         switch (type) {
             case ELECTRA -> triggerElectra(level, entity, center, type);
@@ -116,6 +133,8 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             case LIGHTER -> triggerLighter(level, entity, type);
             case CAROUSEL -> triggerCarousel(entity, center, type);
         }
+
+        StalkerPortMod.LOGGER.info("[ANOMALY] ACTIVATE {} by {}", pos, entity.getUUID());
 
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D);
@@ -177,14 +196,21 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         entity.hasImpulse = true;
     }
 
-    private static boolean canTriggerEntity(Level level, LivingEntity entity, AnomalyType type) {
-        String key = "stalker_port.anomaly_cd." + type.name().toLowerCase();
-        return level.getGameTime() >= entity.getPersistentData().getLong(key);
+    private boolean canTriggerEntity(LivingEntity entity) {
+        return this.entityCooldownTicks.getOrDefault(entity.getUUID(), 0) <= 0;
     }
 
-    private static void setEntityCooldown(Level level, LivingEntity entity, AnomalyType type, int ticks) {
-        String key = "stalker_port.anomaly_cd." + type.name().toLowerCase();
-        entity.getPersistentData().putLong(key, level.getGameTime() + ticks);
+    private void tickEntityCooldowns() {
+        Iterator<Map.Entry<UUID, Integer>> iterator = this.entityCooldownTicks.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<UUID, Integer> entry = iterator.next();
+            int next = entry.getValue() - 1;
+            if (next <= 0) {
+                iterator.remove();
+            } else {
+                entry.setValue(next);
+            }
+        }
     }
 
     private static SoundEvent resolveActivateSound(AnomalyType type) {

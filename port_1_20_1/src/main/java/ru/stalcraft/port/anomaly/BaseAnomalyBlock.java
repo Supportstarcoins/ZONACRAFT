@@ -66,8 +66,11 @@ public class BaseAnomalyBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlockEntities.ANOMALY.get(),
-            level.isClientSide ? BaseAnomalyBlockEntity::clientTick : BaseAnomalyBlockEntity::serverTick);
+        if (level.isClientSide) {
+            return null;
+        }
+
+        return createTickerHelper(type, ModBlockEntities.ANOMALY.get(), BaseAnomalyBlockEntity::serverTick);
     }
 
     @Override
