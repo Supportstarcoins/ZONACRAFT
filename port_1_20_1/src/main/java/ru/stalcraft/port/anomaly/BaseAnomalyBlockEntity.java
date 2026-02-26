@@ -144,7 +144,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             case CAROUSEL -> triggerCarousel(entity, center, type);
         }
 
-        StalkerPortMod.LOGGER.info("[ANOMALY] ACTIVATE {} by {}", pos, entity.getUUID());
+        StalkerPortMod.LOGGER.info("[ANOMALY] ACTIVATE anomaly={} pos={} by={}", type.name().toLowerCase(), pos, entity.getUUID());
         this.setActiveState(level, pos, state, true);
         state = level.getBlockState(pos);
 
@@ -262,7 +262,10 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
 
     private void setActiveState(Level level, BlockPos pos, BlockState state, boolean active) {
         if (state.hasProperty(BaseAnomalyBlock.ACTIVE) && state.getValue(BaseAnomalyBlock.ACTIVE) != active) {
-            level.setBlock(pos, state.setValue(BaseAnomalyBlock.ACTIVE, active), 3);
+            BlockState updated = state.setValue(BaseAnomalyBlock.ACTIVE, active);
+            level.setBlock(pos, updated, 3);
+            level.sendBlockUpdated(pos, state, updated, 3);
+            setChanged();
         }
     }
 
