@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -28,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import ru.stalcraft.port.StalkerPortMod;
 import ru.stalcraft.port.registry.ModBlockEntities;
+import ru.stalcraft.port.registry.ModParticles;
 import ru.stalcraft.port.registry.ModSounds;
 
 public class BaseAnomalyBlockEntity extends BlockEntity {
@@ -149,7 +149,8 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         state = level.getBlockState(pos);
 
         if (level instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D);
+            ModParticles.get("bolt_distortion").ifPresent(particle ->
+                serverLevel.sendParticles(particle, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D));
             SoundEvent activate = resolveActivateSound(type);
             level.playSound(null, pos, activate, SoundSource.BLOCKS, 1.0F, 1.0F);
             StalkerPortMod.LOGGER.info("PLAY sound={} tick={}", activate.getLocation(), level.getGameTime());

@@ -1,5 +1,1 @@
-{
-  "textures": [
-    "stalker_port:particle/bolt_distortion"
-  ]
-}
+{ "textures": ["stalker_port:particle/bolt_distortion"] }
