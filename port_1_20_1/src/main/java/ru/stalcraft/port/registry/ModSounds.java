@@ -15,15 +15,29 @@ public final class ModSounds {
     public static final RegistryObject<SoundEvent> ELECTRA_AMBIENT = register("anomaly.electra.ambient");
     public static final RegistryObject<SoundEvent> ELECTRA_ACTIVATE = register("anomaly.electra.activate");
     public static final RegistryObject<SoundEvent> ELECTRA_HIT = register("anomaly.electra.hit");
+
     public static final RegistryObject<SoundEvent> BLACK_HOLE_AMBIENT = register("anomaly.black_hole.ambient");
     public static final RegistryObject<SoundEvent> BLACK_HOLE_ACTIVATE = register("anomaly.black_hole.activate");
     public static final RegistryObject<SoundEvent> BLACK_HOLE_HIT = register("anomaly.black_hole.hit");
+
+    public static final RegistryObject<SoundEvent> FUNNEL_AMBIENT = register("anomaly.funnel.ambient");
+    public static final RegistryObject<SoundEvent> FUNNEL_ACTIVATE = register("anomaly.funnel.activate");
+    public static final RegistryObject<SoundEvent> FUNNEL_HIT = register("anomaly.funnel.hit");
+    public static final RegistryObject<SoundEvent> FUNEL_AMBIENT = register("anomaly.funel.ambient");
+    public static final RegistryObject<SoundEvent> FUNEL_ACTIVATE = register("anomaly.funel.activate");
+    public static final RegistryObject<SoundEvent> FUNEL_HIT = register("anomaly.funel.hit");
+
     public static final RegistryObject<SoundEvent> TRAMPOLINE_AMBIENT = register("anomaly.trampoline.ambient");
     public static final RegistryObject<SoundEvent> TRAMPOLINE_ACTIVATE = register("anomaly.trampoline.activate");
     public static final RegistryObject<SoundEvent> TRAMPOLINE_HIT = register("anomaly.trampoline.hit");
+    public static final RegistryObject<SoundEvent> TRANPOLINE_AMBIENT = register("anomaly.tranpoline.ambient");
+    public static final RegistryObject<SoundEvent> TRANPOLINE_ACTIVATE = register("anomaly.tranpoline.activate");
+    public static final RegistryObject<SoundEvent> TRANPOLINE_HIT = register("anomaly.tranpoline.hit");
+
     public static final RegistryObject<SoundEvent> LIGHTER_AMBIENT = register("anomaly.lighter.ambient");
     public static final RegistryObject<SoundEvent> LIGHTER_ACTIVATE = register("anomaly.lighter.activate");
     public static final RegistryObject<SoundEvent> LIGHTER_HIT = register("anomaly.lighter.hit");
+
     public static final RegistryObject<SoundEvent> CAROUSEL_AMBIENT = register("anomaly.carousel.ambient");
     public static final RegistryObject<SoundEvent> CAROUSEL_ACTIVATE = register("anomaly.carousel.activate");
     public static final RegistryObject<SoundEvent> CAROUSEL_HIT = register("anomaly.carousel.hit");

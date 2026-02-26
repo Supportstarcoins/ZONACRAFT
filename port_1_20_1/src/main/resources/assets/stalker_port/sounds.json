@@ -1,137 +1,76 @@
 {
   "anomaly.electra.ambient": {
     "subtitle": "subtitles.stalker_port.anomaly.electra.ambient",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/electra",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:electra", "stream": false }]
   },
   "anomaly.electra.activate": {
     "subtitle": "subtitles.stalker_port.anomaly.electra.activate",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/electra_hit",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:electra_hit", "stream": false }]
   },
   "anomaly.electra.hit": {
     "subtitle": "subtitles.stalker_port.anomaly.electra.hit",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/electra_hit",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:electra_hit", "stream": false }]
   },
+
   "anomaly.black_hole.ambient": {
     "subtitle": "subtitles.stalker_port.anomaly.black_hole.ambient",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/blackhole_active",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:blackhole", "stream": false }]
   },
   "anomaly.black_hole.activate": {
     "subtitle": "subtitles.stalker_port.anomaly.black_hole.activate",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/blackhole",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:blackhole_active", "stream": false }]
   },
   "anomaly.black_hole.hit": {
     "subtitle": "subtitles.stalker_port.anomaly.black_hole.hit",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/blackhole_bolt_active",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:blackhole_bolt_active", "stream": false }]
   },
+
+  "anomaly.funnel.ambient": { "sounds": [{ "name": "stalker_port:blackhole", "stream": false }] },
+  "anomaly.funnel.activate": { "sounds": [{ "name": "stalker_port:blackhole_active", "stream": false }] },
+  "anomaly.funnel.hit": { "sounds": [{ "name": "stalker_port:blackhole_bolt_active", "stream": false }] },
+  "anomaly.funel.ambient": { "sounds": [{ "name": "stalker_port:blackhole", "stream": false }] },
+  "anomaly.funel.activate": { "sounds": [{ "name": "stalker_port:blackhole_active", "stream": false }] },
+  "anomaly.funel.hit": { "sounds": [{ "name": "stalker_port:blackhole_bolt_active", "stream": false }] },
+
   "anomaly.trampoline.ambient": {
     "subtitle": "subtitles.stalker_port.anomaly.trampoline.ambient",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/trampoline",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:trampoline", "stream": false }]
   },
   "anomaly.trampoline.activate": {
     "subtitle": "subtitles.stalker_port.anomaly.trampoline.activate",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/trampoline_hit",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:trampoline_hit", "stream": false }]
   },
   "anomaly.trampoline.hit": {
     "subtitle": "subtitles.stalker_port.anomaly.trampoline.hit",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/trampoline_hit",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:trampoline_hit", "stream": false }]
   },
+  "anomaly.tranpoline.ambient": { "sounds": [{ "name": "stalker_port:trampoline", "stream": false }] },
+  "anomaly.tranpoline.activate": { "sounds": [{ "name": "stalker_port:trampoline_hit", "stream": false }] },
+  "anomaly.tranpoline.hit": { "sounds": [{ "name": "stalker_port:trampoline_hit", "stream": false }] },
+
   "anomaly.lighter.ambient": {
     "subtitle": "subtitles.stalker_port.anomaly.lighter.ambient",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/lighter",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:lighter", "stream": false }]
   },
   "anomaly.lighter.activate": {
     "subtitle": "subtitles.stalker_port.anomaly.lighter.activate",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/lighter",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:lighter", "stream": false }]
   },
   "anomaly.lighter.hit": {
     "subtitle": "subtitles.stalker_port.anomaly.lighter.hit",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/hit3",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:hit3", "stream": false }]
   },
+
   "anomaly.carousel.ambient": {
     "subtitle": "subtitles.stalker_port.anomaly.carousel.ambient",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/carousel_bolt_active",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:carousel_bolt_active", "stream": false }]
   },
   "anomaly.carousel.activate": {
     "subtitle": "subtitles.stalker_port.anomaly.carousel.activate",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/carousel",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:carousel", "stream": false }]
   },
   "anomaly.carousel.hit": {
     "subtitle": "subtitles.stalker_port.anomaly.carousel.hit",
-    "sounds": [
-      {
-        "name": "stalker_port:anomaly/hit6",
-        "stream": false
-      }
-    ]
+    "sounds": [{ "name": "stalker_port:hit6", "stream": false }]
   }
 }

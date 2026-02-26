@@ -144,13 +144,15 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             case CAROUSEL -> triggerCarousel(entity, center, type);
         }
 
-        StalkerPortMod.LOGGER.info("[ANOMALY] ACTIVATE anomaly={} pos={} by={}", type.name().toLowerCase(), pos, entity.getUUID());
+        StalkerPortMod.LOGGER.info("ACTIVATE anomaly={} tick={}", type.name().toLowerCase(), level.getGameTime());
         this.setActiveState(level, pos, state, true);
         state = level.getBlockState(pos);
 
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D);
-            level.playSound(null, pos, resolveActivateSound(type), SoundSource.BLOCKS, 0.9F, 0.9F + level.random.nextFloat() * 0.2F);
+            SoundEvent activate = resolveActivateSound(type);
+            level.playSound(null, pos, activate, SoundSource.BLOCKS, 1.0F, 1.0F);
+            StalkerPortMod.LOGGER.info("PLAY sound={} tick={}", activate.getLocation(), level.getGameTime());
         }
 
         AnomalyFxDispatcher.spawnActivate(level, pos, type, this.fxSeed);
