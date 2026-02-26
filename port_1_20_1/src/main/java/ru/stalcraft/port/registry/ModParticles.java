@@ -31,6 +31,8 @@ public final class ModParticles {
         register("lighter/distortion");
         register("trampoline/distortion");
         register("trampoline/idle");
+        register("carousel/distortion");
+        register("carousel/idle");
     }
 
     private ModParticles() {

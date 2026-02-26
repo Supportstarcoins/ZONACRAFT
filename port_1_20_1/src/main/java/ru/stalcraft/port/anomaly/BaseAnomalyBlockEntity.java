@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import ru.stalcraft.port.StalkerPortMod;
 import ru.stalcraft.port.registry.ModBlockEntities;
@@ -69,7 +70,7 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             StalkerPortMod.LOGGER.info("[ANOMALY] {} tick @{} cooldown={} active={}", block.anomalyType(), pos, be.cooldownTicks, be.activeTicks);
         }
 
-        AnomalyType type = block.anomalyType();
+        AnomalyType type = be.resolveAnomalyType(state, block);
         Vec3 center = Vec3.atCenterOf(pos);
         AABB searchBox = new AABB(pos).inflate(type.radius());
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
@@ -111,8 +112,22 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         }
 
         if (state.getBlock() instanceof BaseAnomalyBlock block) {
-            AnomalyFxDispatcher.spawnAmbient(level, pos, block.anomalyType(), be.animationTick, be.fxSeed, be.activeTicks > 0);
+            AnomalyType type = be.resolveAnomalyType(state, block);
+            AnomalyFxDispatcher.spawnAmbient(level, pos, type, be.animationTick, be.fxSeed, be.activeTicks > 0);
         }
+    }
+
+    private AnomalyType resolveAnomalyType(BlockState state, BaseAnomalyBlock fallbackBlock) {
+        var key = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        if (key == null) {
+            return fallbackBlock.anomalyType();
+        }
+
+        return switch (key.getPath()) {
+            case "trampoline", "tranpoline" -> AnomalyType.TRAMPOLINE;
+            case "carousel" -> AnomalyType.CAROUSEL;
+            default -> fallbackBlock.anomalyType();
+        };
     }
 
     public void requestImmediateCheck(Entity entity) {
@@ -149,7 +164,8 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         state = level.getBlockState(pos);
 
         if (level instanceof ServerLevel serverLevel) {
-            ModParticles.get("bolt_distortion").ifPresent(particle ->
+            String activateParticleId = type == AnomalyType.CAROUSEL ? "carousel/distortion" : "bolt_distortion";
+            ModParticles.get(activateParticleId).ifPresent(particle ->
                 serverLevel.sendParticles(particle, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D));
             SoundEvent activate = resolveActivateSound(type);
             level.playSound(null, pos, activate, SoundSource.BLOCKS, 1.0F, 1.0F);
