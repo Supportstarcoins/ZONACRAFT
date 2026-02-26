@@ -14,7 +14,10 @@ public final class ModBlocks {
 
     public static final RegistryObject<Block> CAROUSEL = registerAnomalyBlock("carousel", AnomalyType.CAROUSEL);
     public static final RegistryObject<Block> TRAMPOLINE = registerAnomalyBlock("trampoline", AnomalyType.TRAMPOLINE);
+    public static final RegistryObject<Block> TRANPOLINE = registerAnomalyAlias("tranpoline", AnomalyType.TRAMPOLINE);
     public static final RegistryObject<Block> BLACK_HOLE = registerAnomalyBlock("black_hole", AnomalyType.BLACK_HOLE);
+    public static final RegistryObject<Block> FUNNEL = registerAnomalyAlias("funnel", AnomalyType.BLACK_HOLE);
+    public static final RegistryObject<Block> FUNEL = registerAnomalyAlias("funel", AnomalyType.BLACK_HOLE);
     public static final RegistryObject<Block> LIGHTER = registerAnomalyBlock("lighter", AnomalyType.LIGHTER);
     public static final RegistryObject<Block> ELECTRA = registerAnomalyBlock("electra", AnomalyType.ELECTRA);
 
@@ -25,6 +28,10 @@ public final class ModBlocks {
         RegistryObject<Block> block = BLOCKS.register(id, () -> new BaseAnomalyBlock(anomalyType));
         ModItems.registerBlockItem(id, block);
         return block;
+    }
+
+    private static RegistryObject<Block> registerAnomalyAlias(String id, AnomalyType anomalyType) {
+        return BLOCKS.register(id, () -> new BaseAnomalyBlock(anomalyType));
     }
 
     public static void register(IEventBus eventBus) {

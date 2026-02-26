@@ -16,7 +16,10 @@ public final class ModBlockEntities {
         () -> BlockEntityType.Builder.of(BaseAnomalyBlockEntity::new,
             ModBlocks.CAROUSEL.get(),
             ModBlocks.TRAMPOLINE.get(),
+            ModBlocks.TRANPOLINE.get(),
             ModBlocks.BLACK_HOLE.get(),
+            ModBlocks.FUNNEL.get(),
+            ModBlocks.FUNEL.get(),
             ModBlocks.LIGHTER.get(),
             ModBlocks.ELECTRA.get())
             .build(null));
