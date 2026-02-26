@@ -72,7 +72,7 @@ public final class AnomalyFxDispatcher {
             case BLACK_HOLE -> activate ? "funnel/funnel_eye" : "funnel/distortion";
             case TRAMPOLINE -> activate ? "trampoline/distortion" : "trampoline/idle";
             case LIGHTER -> "lighter/distortion";
-            case CAROUSEL -> "bolt_distortion";
+            case CAROUSEL -> activate ? "carousel/distortion" : "carousel/idle";
         }).orElse(null);
 
         if (particle == null) {

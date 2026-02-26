@@ -27,6 +27,9 @@ public final class AnomalyClientFxHooks {
         if (type == AnomalyType.TRAMPOLINE) {
             spawnTrampolineLeaf(level, pos, random);
         }
+        if (type == AnomalyType.CAROUSEL && animationTick % 2 == 0) {
+            spawnCarouselLeaf(level, pos, random);
+        }
         if (type == AnomalyType.BLACK_HOLE) {
             if (animationTick % 40 == 0 && !active) {
                 spawnFunnelEye(level, pos, random);
@@ -79,7 +82,7 @@ public final class AnomalyClientFxHooks {
             case TRAMPOLINE -> 250;
             case BLACK_HOLE -> 50;
             case LIGHTER -> 0;
-            case CAROUSEL -> 18;
+            case CAROUSEL -> 24;
         };
 
         for (int i = 0; i < particles; i++) {
@@ -92,8 +95,12 @@ public final class AnomalyClientFxHooks {
                     (random.nextDouble() - 0.5D) * 0.03D, 0.06D + random.nextDouble() * 0.05D, (random.nextDouble() - 0.5D) * 0.03D);
                 case BLACK_HOLE -> add(level, "funnel/distortion", pos, 0.5D + (random.nextDouble() - 0.5D) * 0.7D,
                     0.1D + random.nextDouble() * 0.8D, 0.5D + (random.nextDouble() - 0.5D) * 0.7D, 0.0D, 0.03D, 0.0D);
-                case LIGHTER, CAROUSEL -> {
+                case LIGHTER -> {
                 }
+                case CAROUSEL -> add(level, pick(random, "carousel/distortion", "carousel/idle"), pos,
+                    0.5D + (random.nextDouble() - 0.5D) * 1.1D,
+                    0.15D + random.nextDouble() * 0.8D, 0.5D + (random.nextDouble() - 0.5D) * 1.1D,
+                    (random.nextDouble() - 0.5D) * 0.02D, 0.03D + random.nextDouble() * 0.03D, (random.nextDouble() - 0.5D) * 0.02D);
             }
         }
 
@@ -113,7 +120,7 @@ public final class AnomalyClientFxHooks {
                 case BLACK_HOLE -> "funnel/distortion";
                 case TRAMPOLINE -> pick(random, "trampoline/distortion", "trampoline/idle");
                 case LIGHTER -> "lighter/distortion";
-                case CAROUSEL -> "bolt_distortion";
+                case CAROUSEL -> pick(random, "carousel/distortion", "carousel/idle");
             }, pos,
                 0.5D + (random.nextDouble() - 0.5D) * 0.6D,
                 0.15D + random.nextDouble() * 0.4D,
@@ -160,6 +167,13 @@ public final class AnomalyClientFxHooks {
         add(level, "trampoline/idle", pos, 0.5D + (random.nextDouble() - 0.5D) * 1.7D,
             0.35D + random.nextDouble() * 0.2D, 0.5D + (random.nextDouble() - 0.5D) * 1.7D,
             0.0D, 0.01D, 0.0D);
+    }
+
+    private static void spawnCarouselLeaf(Level level, BlockPos pos, RandomSource random) {
+        add(level, pick(random, "carousel/idle", "carousel/distortion"), pos,
+            0.5D + (random.nextDouble() - 0.5D) * 1.8D,
+            0.3D + random.nextDouble() * 0.5D, 0.5D + (random.nextDouble() - 0.5D) * 1.8D,
+            0.0D, 0.015D, 0.0D);
     }
 
     private static void spawnFunnelLeaf(Level level, BlockPos pos, RandomSource random) {
