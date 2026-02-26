@@ -31,6 +31,8 @@ import ru.stalcraft.port.registry.ModBlockEntities;
 import ru.stalcraft.port.registry.ModSounds;
 
 public class BaseAnomalyBlockEntity extends BlockEntity {
+    private static final int DEBUG_LOG_INTERVAL = 40;
+
     private int cooldownTicks;
     private int activeTicks;
     private int animationTick;
@@ -63,17 +65,17 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             return;
         }
 
-        if (be.animationTick % 40 == 0) {
+        if (be.animationTick % DEBUG_LOG_INTERVAL == 0) {
             StalkerPortMod.LOGGER.info("[ANOMALY] {} tick @{} cooldown={} active={}", block.anomalyType(), pos, be.cooldownTicks, be.activeTicks);
         }
 
         AnomalyType type = block.anomalyType();
         Vec3 center = Vec3.atCenterOf(pos);
-        AABB searchBox = new AABB(center, center).inflate(type.radius());
+        AABB searchBox = new AABB(pos).inflate(type.radius());
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
             entity -> entity.isAlive() && !entity.isSpectator());
 
-        if (!entities.isEmpty() && be.animationTick % 10 == 0) {
+        if (!entities.isEmpty()) {
             for (LivingEntity entity : entities) {
                 StalkerPortMod.LOGGER.info("[ANOMALY] detect {} entity={} uuid={} @{}", type, entity.getType().toShortString(), entity.getUUID(), pos);
             }
@@ -83,16 +85,20 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
             applyBlackHolePull(entities, center, type);
         }
 
-        boolean triggerAttempt = be.immediateCheckRequested || (be.animationTick % 4 == 0 && !entities.isEmpty());
+        boolean triggerAttempt = be.immediateCheckRequested || !entities.isEmpty();
         be.immediateCheckRequested = false;
 
-        if (triggerAttempt && be.cooldownTicks <= 0) {
+        if (triggerAttempt) {
             for (LivingEntity entity : entities) {
-                if (entity.position().distanceTo(center) <= type.triggerDistance() && be.canTriggerEntity(entity)) {
-                    be.trigger(level, pos, state, entity, type, center);
+                if (entity.position().distanceTo(center) <= type.triggerDistance() && be.tryTrigger(level, pos, state, entity, type, center)) {
                     break;
                 }
             }
+        }
+
+        if (be.activeTicks <= 0 && state.getValue(BaseAnomalyBlock.ACTIVE)) {
+            be.setActiveState(level, pos, state, false);
+            state = level.getBlockState(pos);
         }
 
         be.syncStateIfNeeded(level, pos, state);
@@ -120,9 +126,13 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    private void trigger(Level level, BlockPos pos, BlockState state, LivingEntity entity, AnomalyType type, Vec3 center) {
-        this.cooldownTicks = type.cooldownTicks();
-        this.activeTicks = type.activeTicks();
+    private boolean tryTrigger(Level level, BlockPos pos, BlockState state, LivingEntity entity, AnomalyType type, Vec3 center) {
+        if (this.cooldownTicks > 0 || !this.canTriggerEntity(entity)) {
+            return false;
+        }
+
+        this.setCooldownTicks(type.cooldownTicks());
+        this.setActiveTicks(type.activeTicks());
         this.lastActivator = entity.getUUID().toString();
         this.entityCooldownTicks.put(entity.getUUID(), type.cooldownTicks() / 2 + 6);
 
@@ -135,6 +145,8 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         }
 
         StalkerPortMod.LOGGER.info("[ANOMALY] ACTIVATE {} by {}", pos, entity.getUUID());
+        this.setActiveState(level, pos, state, true);
+        state = level.getBlockState(pos);
 
         if (level instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 0.3D, center.z, 12, 0.35D, 0.25D, 0.35D, 0.02D);
@@ -146,7 +158,9 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         if (type == AnomalyType.BLACK_HOLE || type == AnomalyType.TRAMPOLINE) {
             AnomalyFxDispatcher.spawnSplash(level, pos, type, this.fxSeed);
         }
+        level.sendBlockUpdated(pos, state, state, 3);
         setChanged();
+        return true;
     }
 
     private static void applyBlackHolePull(List<LivingEntity> entities, Vec3 center, AnomalyType type) {
@@ -200,6 +214,14 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         return this.entityCooldownTicks.getOrDefault(entity.getUUID(), 0) <= 0;
     }
 
+    public void setCooldownTicks(int cooldownTicks) {
+        this.cooldownTicks = Math.max(cooldownTicks, 0);
+    }
+
+    public void setActiveTicks(int activeTicks) {
+        this.activeTicks = Math.max(activeTicks, 0);
+    }
+
     private void tickEntityCooldowns() {
         Iterator<Map.Entry<UUID, Integer>> iterator = this.entityCooldownTicks.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -227,13 +249,20 @@ public class BaseAnomalyBlockEntity extends BlockEntity {
         boolean activeNow = this.activeTicks > 0;
         boolean activeBefore = state.getValue(BaseAnomalyBlock.ACTIVE);
         if (activeBefore != activeNow) {
-            level.setBlock(pos, state.setValue(BaseAnomalyBlock.ACTIVE, activeNow), 3);
+            this.setActiveState(level, pos, state, activeNow);
             state = level.getBlockState(pos);
         }
 
         if (this.lastSyncedActiveTicks != this.activeTicks || (this.animationTick % 20 == 0 && this.cooldownTicks > 0)) {
             this.lastSyncedActiveTicks = this.activeTicks;
             level.sendBlockUpdated(pos, state, state, 3);
+            setChanged();
+        }
+    }
+
+    private void setActiveState(Level level, BlockPos pos, BlockState state, boolean active) {
+        if (state.hasProperty(BaseAnomalyBlock.ACTIVE) && state.getValue(BaseAnomalyBlock.ACTIVE) != active) {
+            level.setBlock(pos, state.setValue(BaseAnomalyBlock.ACTIVE, active), 3);
         }
     }
 
