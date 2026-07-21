@@ -1,6 +1,7 @@
 var auth = {
 	pane: null,
 	loginField: null, passwordField: null,
+	newsEngine1: null, newsEngine2: null,
 	overlayDim: null, overlayDescription: null,
 	sign: null, profiles: null, verifyResult: null,
 
@@ -14,16 +15,15 @@ var auth = {
 		// News view 1
 		var newsView1 = auth.pane.lookup("#news1");
 		newsView1.setBlendMode(javafx.scene.effect.BlendMode.DARKEN);
-		var engine1 = newsView1.getEngine();
-		engine1.setUserDataDirectory(webviewDir);
-		engine1.load(config.newsURL1);
+		auth.newsEngine1 = newsView1.getEngine();
+		auth.newsEngine1.setUserDataDirectory(webviewDir);
 
 		// News view 2
 		var newsView2 = auth.pane.lookup("#news2");
 		newsView2.setBlendMode(javafx.scene.effect.BlendMode.DARKEN);
-		var engine2 = newsView2.getEngine();
-		engine2.setUserDataDirectory(webviewDir);
-		engine2.load(config.newsURL2);
+		auth.newsEngine2 = newsView2.getEngine();
+		auth.newsEngine2.setUserDataDirectory(webviewDir);
+		auth.updateNewsMode();
 
 		// Set action buttons
 		auth.pane.lookup("#auth").setOnAction(auth.goAuth);
@@ -49,6 +49,24 @@ var auth = {
 
 		// Verify launcher only in online mode
 		auth.verifyLauncher();
+	},
+
+	updateNewsMode: function() {
+		if(auth.newsEngine1 === null || auth.newsEngine2 === null) {
+			return;
+		}
+
+		if(settings.offlineMode) {
+			var html = "<html><body style='background:#171717;color:#ddd;font-family:sans-serif;text-align:center;padding-top:80px'>"
+				+ "<h2>ZONACRAFT</h2><p>Офлайн-режим включён</p>"
+				+ "<p>Сетевые новости и старая авторизация отключены.</p></body></html>";
+			auth.newsEngine1.loadContent(html);
+			auth.newsEngine2.loadContent(html);
+			return;
+		}
+
+		auth.newsEngine1.load(config.newsURL1);
+		auth.newsEngine2.load(config.newsURL2);
 	},
 
 	verifyLauncher: function() {
@@ -138,6 +156,7 @@ var auth = {
 	},
 
 	onOfflineSettingsChanged: function() {
+		auth.updateNewsMode();
 		if(settings.offlineMode) {
 			LogHelper.info("Offline mode enabled from settings");
 			auth.verifyResult = null;
