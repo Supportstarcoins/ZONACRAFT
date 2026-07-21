@@ -18,25 +18,40 @@ if not exist "%PROJECT%\src\main\resources\runtime\runtime\init.js" (
 )
 
 set "RUNTIME=%PROJECT%\src\main\resources\runtime\runtime"
+set "PATCH_SRC=%PATCH%src"
+set "PROJECT_SRC=%PROJECT%\src"
+for %%I in ("%PATCH_SRC%") do set "PATCH_SRC_FULL=%%~fI"
+for %%I in ("%PROJECT_SRC%") do set "PROJECT_SRC_FULL=%%~fI"
 
-for %%F in (
-    "%RUNTIME%\config.js"
-    "%RUNTIME%\dialog\auth\auth.js"
-    "%RUNTIME%\dialog\servers\servers.js"
-    "%RUNTIME%\dialog\settings\settings.js"
-    "%RUNTIME%\dialog\settings\settings.fxml"
-    "%RUNTIME%\dialog\update\update.js"
-) do (
-    if exist "%%~F" copy /Y "%%~F" "%%~F.offline_backup" >nul
+if /I "%PATCH_SRC_FULL%"=="%PROJECT_SRC_FULL%" (
+    echo [INFO] Patch was extracted directly into the project folder.
+    echo [INFO] Copy step is skipped because the files are already in src.
+) else (
+    for %%F in (
+        "%RUNTIME%\config.js"
+        "%RUNTIME%\dialog\auth\auth.js"
+        "%RUNTIME%\dialog\servers\servers.js"
+        "%RUNTIME%\dialog\settings\settings.js"
+        "%RUNTIME%\dialog\settings\settings.fxml"
+        "%RUNTIME%\dialog\update\update.js"
+    ) do (
+        if exist "%%~F" copy /Y "%%~F" "%%~F.offline_backup" >nul
+    )
+
+    xcopy /E /I /Y "%PATCH_SRC%" "%PROJECT_SRC%" >nul
+    if errorlevel 1 (
+        echo [ERROR] Failed to copy patch files.
+        exit /b 1
+    )
 )
 
-xcopy /E /I /Y "%PATCH%src" "%PROJECT%\src" >nul
-if errorlevel 1 (
-    echo [ERROR] Failed to copy patch files.
+if not exist "%PROJECT%\src\main\java\launcher\client\LocalOfflineLauncher.java" (
+    echo [ERROR] LocalOfflineLauncher.java is missing.
+    echo Extract the complete archive, not only install_offline_patch.bat.
     exit /b 1
 )
 
-echo [OK] Offline-mode source files installed.
+echo [OK] Offline-mode source files are present.
 echo.
 
 pushd "%PROJECT%"
