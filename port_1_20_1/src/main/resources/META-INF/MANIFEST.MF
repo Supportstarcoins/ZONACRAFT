@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-FMLCorePlugin: ru.stalcraft.asm.StalkerLoadingPlugin
-FMLCorePluginContainsFMLMod: true
-Created-By: 1.7.0 (Oracle Corporation)
