@@ -63,7 +63,7 @@ if not "%RESULT%"=="0" (
 echo.
 echo ============================================================
 echo OFFLINE SETTINGS PATCH INSTALLED SUCCESSFULLY
-necho ============================================================
+echo ============================================================
 echo Open launcher Settings, enable Offline mode and enter a nick.
 echo Offline launch uses only client files already present in the updates folder.
 exit /b 0
