@@ -67,19 +67,26 @@ final class ZonePatchEvents {
         if (!PatchSettings.enabled || event == null || event.itemStack == null || event.toolTip == null) {
             return;
         }
+
+        // Absolutely never touch ordinary Minecraft/mod items. Earlier versions
+        // trusted config matching alone; a broad itemMatch could make unrelated
+        // items such as enchanted books appear as "Unnamed" in NEI/creative GUIs.
+        if (!ReflectionAccess.isGlbSuit(event.itemStack)) {
+            return;
+        }
+
         ArmorProfile profile = BridgeProfiles.find(event.itemStack);
         if (profile == null) {
             return;
         }
 
         List tooltip = event.toolTip;
+        String displayName = ReflectionAccess.getStackDisplayName(event.itemStack);
+        restoreTitle(tooltip, displayName);
         if (tooltip.isEmpty()) {
             return;
         }
 
-        // Index 0 is the actual localized item name. Never remove, replace or
-        // de-duplicate it: NEI and several 1.6.4 GUIs show "Unnamed" when the
-        // title row disappears from ItemTooltipEvent.
         int index;
         for (index = tooltip.size() - 1; index >= 1; index--) {
             Object raw = tooltip.get(index);
@@ -97,8 +104,6 @@ final class ZonePatchEvents {
                 seen.add(titleNormalized);
             }
 
-            // Walk forward and keep the first occurrence. This preserves the
-            // title and the original ordering of all useful characteristic rows.
             for (index = 1; index < tooltip.size(); index++) {
                 Object raw = tooltip.get(index);
                 String normalized = normalizeTooltip(raw == null ? "" : String.valueOf(raw));
@@ -114,6 +119,22 @@ final class ZonePatchEvents {
             }
             removeRepeatedBlankLines(tooltip);
         }
+
+        // Restore once more after all mutations. This makes the title invariant
+        // even when another 1.6.4 tooltip handler runs before this one.
+        restoreTitle(tooltip, displayName);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void restoreTitle(List tooltip, String displayName) {
+        if (displayName == null || displayName.trim().length() == 0) {
+            return;
+        }
+        if (tooltip.isEmpty()) {
+            tooltip.add(displayName);
+            return;
+        }
+        tooltip.set(0, displayName);
     }
 
     private static boolean isBulletDamage(Object damageSource, String damageType) {
@@ -172,7 +193,6 @@ final class ZonePatchEvents {
     private static void removeRepeatedBlankLines(List tooltip) {
         boolean previousBlank = false;
         int index;
-        // Start at 1 so the localized item name at index 0 is untouchable.
         for (index = tooltip.size() - 1; index >= 1; index--) {
             Object raw = tooltip.get(index);
             String normalized = normalizeTooltip(raw == null ? "" : String.valueOf(raw));
