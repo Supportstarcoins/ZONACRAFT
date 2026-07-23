@@ -1,0 +1,61 @@
+name: Build Armor Zone Patch
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'bridge_1_6_4_zone_patch/src/**'
+      - 'bridge_1_6_4_zone_patch/stubs/**'
+      - 'bridge_1_6_4_zone_patch/resources/**'
+      - 'bridge_1_6_4_zone_patch/MANIFEST.MF'
+      - '.github/workflows/build-armor-zone-patch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Compile Java 7 compatible classes
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT=bridge_1_6_4_zone_patch
+          rm -rf "$PROJECT/build"
+          mkdir -p "$PROJECT/build/all-classes" "$PROJECT/build/jar-classes" "$PROJECT/release"
+          find "$PROJECT/stubs" "$PROJECT/src" -name '*.java' -print > "$PROJECT/build/sources.txt"
+          javac -source 1.7 -target 1.7 -encoding UTF-8 -Xlint:unchecked \
+            -d "$PROJECT/build/all-classes" @"$PROJECT/build/sources.txt"
+
+          mkdir -p "$PROJECT/build/jar-classes/ru"
+          cp -R "$PROJECT/build/all-classes/ru/zonecraft" "$PROJECT/build/jar-classes/ru/"
+          cp "$PROJECT/resources/mcmod.info" "$PROJECT/build/jar-classes/mcmod.info"
+
+          JAR="$PROJECT/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0.jar"
+          (cd "$PROJECT/build/jar-classes" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
+
+          test "$(unzip -p "$JAR" ru/zonecraft/stalkerarmorzonepatch/ArmorZonePatchMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
+          unzip -t "$JAR"
+          jar tf "$JAR" | grep 'ru/zonecraft/stalkerarmorzonepatch/ZonePatchEvents.class'
+          if jar tf "$JAR" | grep -qE '^(cpw/|net/)'; then
+            echo 'Compile stubs leaked into runtime JAR' >&2
+            exit 1
+          fi
+
+      - name: Upload compiled patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0
+          path: bridge_1_6_4_zone_patch/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0.jar
+          if-no-files-found: error
