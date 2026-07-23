@@ -10,7 +10,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 
-final class ZonePatchEvents {
+public final class ZonePatchEvents {
     @ForgeSubscribe(priority = EventPriority.LOWEST)
     public void onLivingHurt(LivingHurtEvent event) {
         PatchSettings.reloadIfNeeded();
@@ -68,9 +68,6 @@ final class ZonePatchEvents {
             return;
         }
 
-        // Absolutely never touch ordinary Minecraft/mod items. Earlier versions
-        // trusted config matching alone; a broad itemMatch could make unrelated
-        // items such as enchanted books appear as "Unnamed" in NEI/creative GUIs.
         if (!ReflectionAccess.isGlbSuit(event.itemStack)) {
             return;
         }
@@ -120,8 +117,6 @@ final class ZonePatchEvents {
             removeRepeatedBlankLines(tooltip);
         }
 
-        // Restore once more after all mutations. This makes the title invariant
-        // even when another 1.6.4 tooltip handler runs before this one.
         restoreTitle(tooltip, displayName);
     }
 
