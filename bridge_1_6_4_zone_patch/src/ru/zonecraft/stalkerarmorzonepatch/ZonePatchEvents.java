@@ -73,8 +73,15 @@ final class ZonePatchEvents {
         }
 
         List tooltip = event.toolTip;
+        if (tooltip.isEmpty()) {
+            return;
+        }
+
+        // Index 0 is the actual localized item name. Never remove, replace or
+        // de-duplicate it: NEI and several 1.6.4 GUIs show "Unnamed" when the
+        // title row disappears from ItemTooltipEvent.
         int index;
-        for (index = tooltip.size() - 1; index >= 0; index--) {
+        for (index = tooltip.size() - 1; index >= 1; index--) {
             Object raw = tooltip.get(index);
             String normalized = normalizeTooltip(raw == null ? "" : String.valueOf(raw));
             if (shouldHideLegacy(normalized)) {
@@ -84,7 +91,15 @@ final class ZonePatchEvents {
 
         if (PatchSettings.deduplicateAllTooltipLines) {
             Set<String> seen = new HashSet<String>();
-            for (index = tooltip.size() - 1; index >= 0; index--) {
+            Object title = tooltip.get(0);
+            String titleNormalized = normalizeTooltip(title == null ? "" : String.valueOf(title));
+            if (titleNormalized.length() > 0) {
+                seen.add(titleNormalized);
+            }
+
+            // Walk forward and keep the first occurrence. This preserves the
+            // title and the original ordering of all useful characteristic rows.
+            for (index = 1; index < tooltip.size(); index++) {
                 Object raw = tooltip.get(index);
                 String normalized = normalizeTooltip(raw == null ? "" : String.valueOf(raw));
                 if (normalized.length() == 0) {
@@ -92,6 +107,7 @@ final class ZonePatchEvents {
                 }
                 if (seen.contains(normalized)) {
                     tooltip.remove(index);
+                    index--;
                 } else {
                     seen.add(normalized);
                 }
@@ -156,8 +172,10 @@ final class ZonePatchEvents {
     private static void removeRepeatedBlankLines(List tooltip) {
         boolean previousBlank = false;
         int index;
-        for (index = tooltip.size() - 1; index >= 0; index--) {
-            String normalized = normalizeTooltip(String.valueOf(tooltip.get(index)));
+        // Start at 1 so the localized item name at index 0 is untouchable.
+        for (index = tooltip.size() - 1; index >= 1; index--) {
+            Object raw = tooltip.get(index);
+            String normalized = normalizeTooltip(raw == null ? "" : String.valueOf(raw));
             boolean blank = normalized.length() == 0;
             if (blank && previousBlank) {
                 tooltip.remove(index);
