@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: Zonecraft Armor Zone & Tooltip Patch
+Implementation-Version: 1.0.0
+
