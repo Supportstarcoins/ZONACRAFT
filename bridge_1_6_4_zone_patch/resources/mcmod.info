@@ -3,7 +3,7 @@
     "modid": "zonecraftarmorzonepatch",
     "name": "Zonecraft Armor Zone & Tooltip Patch",
     "description": "Makes head and limb armor values functional and cleans duplicate GLB suit rows without touching names of ordinary items.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "mcversion": "1.6.4",
     "url": "",
     "updateUrl": "",
