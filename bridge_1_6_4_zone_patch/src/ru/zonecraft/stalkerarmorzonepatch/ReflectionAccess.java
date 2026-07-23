@@ -3,6 +3,7 @@ package ru.zonecraft.stalkerarmorzonepatch;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 final class ReflectionAccess {
     private ReflectionAccess() {
@@ -25,10 +26,7 @@ final class ReflectionAccess {
     }
 
     static int getItemId(Object itemStack) {
-        Object item = invoke(itemStack, new String[] {"getItem", "func_77973_b"}, new Class[0], new Object[0]);
-        if (item == null) {
-            item = field(itemStack, new String[] {"item", "field_151002_e"});
-        }
+        Object item = getItem(itemStack);
         Number id = numberField(item, new String[] {"itemID", "field_77779_bT"});
         if (id != null) {
             return id.intValue();
@@ -41,7 +39,7 @@ final class ReflectionAccess {
         if (itemStack == null) {
             return null;
         }
-        Object item = invoke(itemStack, new String[] {"getItem", "func_77973_b"}, new Class[0], new Object[0]);
+        Object item = getItem(itemStack);
         Object name = null;
         if (item != null) {
             name = invokeCompatible(item, new String[] {"getUnlocalizedName", "func_77667_c"}, new Object[] {itemStack});
@@ -51,6 +49,35 @@ final class ReflectionAccess {
         }
         String className = item == null ? itemStack.getClass().getName() : item.getClass().getName();
         return (name instanceof String ? String.valueOf(name) : "") + "|" + className + "|" + getItemId(itemStack);
+    }
+
+    static boolean isGlbSuit(Object itemStack) {
+        if (itemStack == null) {
+            return false;
+        }
+        Object item = getItem(itemStack);
+        Class<?> type = item == null ? itemStack.getClass() : item.getClass();
+        while (type != null) {
+            String name = type.getName().toLowerCase(Locale.ROOT);
+            if (name.indexOf("ru.stalcraft.glbarmor") >= 0 || name.indexOf("itemstalcraftsuit") >= 0) {
+                return true;
+            }
+            type = type.getSuperclass();
+        }
+        return false;
+    }
+
+    static String getStackDisplayName(Object itemStack) {
+        if (itemStack == null) {
+            return "";
+        }
+        Object value = invoke(itemStack, new String[] {"getDisplayName", "func_82833_r"}, new Class[0], new Object[0]);
+        if (value instanceof String) {
+            return String.valueOf(value);
+        }
+        Object item = getItem(itemStack);
+        value = invokeCompatible(item, new String[] {"getItemDisplayName", "func_77653_i"}, new Object[] {itemStack});
+        return value instanceof String ? String.valueOf(value) : "";
     }
 
     static String getDamageType(Object damageSource) {
@@ -149,8 +176,19 @@ final class ReflectionAccess {
         if (entity == null) {
             return false;
         }
-        String name = entity.getClass().getName().toLowerCase();
+        String name = entity.getClass().getName().toLowerCase(Locale.ROOT);
         return name.indexOf("bullet") >= 0 || name.indexOf("projectile") >= 0 || name.indexOf("arrow") >= 0 || name.indexOf("grenade") >= 0 || name.indexOf("rocket") >= 0;
+    }
+
+    private static Object getItem(Object itemStack) {
+        if (itemStack == null) {
+            return null;
+        }
+        Object item = invoke(itemStack, new String[] {"getItem", "func_77973_b"}, new Class[0], new Object[0]);
+        if (item == null) {
+            item = field(itemStack, new String[] {"item", "field_151002_e"});
+        }
+        return item;
     }
 
     private static double[] readVector(Object vector) {
