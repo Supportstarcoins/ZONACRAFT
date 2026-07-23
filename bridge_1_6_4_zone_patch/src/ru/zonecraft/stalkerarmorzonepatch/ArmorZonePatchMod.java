@@ -16,7 +16,7 @@ import net.minecraftforge.common.MinecraftForge;
 )
 public final class ArmorZonePatchMod {
     public static final String MODID = "zonecraftarmorzonepatch";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.0.1";
 
     private static File configDirectory;
 
@@ -25,13 +25,13 @@ public final class ArmorZonePatchMod {
         configDirectory = event.getModConfigurationDirectory();
         PatchSettings.initialize(new File(configDirectory, "zonecraftstalkerarmorzones.cfg"));
         BridgeProfiles.initialize(configDirectory);
-        System.out.println("[Zonecraft Armor Zone Patch] PREINIT 1.0.0 OK");
+        System.out.println("[Zonecraft Armor Zone Patch] PREINIT 1.0.1 OK");
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ZonePatchEvents());
-        System.out.println("[Zonecraft Armor Zone Patch] Hit zones and tooltip cleanup registered.");
+        System.out.println("[Zonecraft Armor Zone Patch] Hit zones and safe tooltip cleanup registered.");
     }
 
     public static File getConfigDirectory() {
