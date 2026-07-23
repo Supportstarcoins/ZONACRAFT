@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "zonecraftarmorzonepatch",
+    "name": "Zonecraft Armor Zone & Tooltip Patch",
+    "description": "Makes head and limb armor values functional for StalkerMod bullets and removes duplicate GLB armor tooltip lines.",
+    "version": "1.0.0",
+    "mcversion": "1.6.4",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["Zonecraft"],
+    "credits": "Bridge compatibility patch",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": ["zonecraftstalkerarmorbridge", "stalcraftglb", "StalkerMod"]
+  }
+]
