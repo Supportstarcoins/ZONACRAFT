@@ -42,7 +42,7 @@ jobs:
           cp -R "$PROJECT/build/all-classes/ru/zonecraft" "$PROJECT/build/jar-classes/ru/"
           cp "$PROJECT/resources/mcmod.info" "$PROJECT/build/jar-classes/mcmod.info"
 
-          JAR="$PROJECT/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0.jar"
+          JAR="$PROJECT/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.1.jar"
           (cd "$PROJECT/build/jar-classes" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
 
           test "$(unzip -p "$JAR" ru/zonecraft/stalkerarmorzonepatch/ArmorZonePatchMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
@@ -56,6 +56,6 @@ jobs:
       - name: Upload compiled patch
         uses: actions/upload-artifact@v4
         with:
-          name: Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0
-          path: bridge_1_6_4_zone_patch/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.0.jar
+          name: Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.1
+          path: bridge_1_6_4_zone_patch/release/Zonecraft-Armor-Zone-Tooltip-Patch-1.6.4-1.0.1.jar
           if-no-files-found: error
