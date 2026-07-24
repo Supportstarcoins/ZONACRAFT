@@ -1,4 +1,4 @@
-name: Package Blender GLB Hotfix
+name: Package Full Blender GLB Exporter
 
 on:
   push:
@@ -13,9 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Upload ready hotfix
+      - name: Syntax check full exporter
+        run: python3 -m py_compile tools/blender_stalcraft_glb_export_0.4.3_FULL_FIXED.py
+      - name: Show file size
+        run: ls -lh tools/blender_stalcraft_glb_export_0.4.3_FULL_FIXED.py
+      - name: Upload full standalone exporter
         uses: actions/upload-artifact@v4
         with:
-          name: STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX
-          path: tools/STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX.py
+          name: blender_stalcraft_glb_export_0.4.3_FULL_FIXED
+          path: tools/blender_stalcraft_glb_export_0.4.3_FULL_FIXED.py
           if-no-files-found: error
