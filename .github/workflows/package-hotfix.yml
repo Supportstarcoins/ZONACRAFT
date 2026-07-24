@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - chatgpt/blender-glb-exporter-0.4.3-fixed
-    paths:
-      - tools/STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX.py
-      - .github/workflows/package-hotfix.yml
+  pull_request:
+    branches:
+      - main
 
 jobs:
   package:
