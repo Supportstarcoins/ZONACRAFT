@@ -1,0 +1,21 @@
+name: Package Blender GLB Hotfix
+
+on:
+  push:
+    branches:
+      - chatgpt/blender-glb-exporter-0.4.3-fixed
+    paths:
+      - tools/STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX.py
+      - .github/workflows/package-hotfix.yml
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload ready hotfix
+        uses: actions/upload-artifact@v4
+        with:
+          name: STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX
+          path: tools/STALCRAFT_GLB_Exporter_0.4.3_READY_HOTFIX.py
+          if-no-files-found: error
