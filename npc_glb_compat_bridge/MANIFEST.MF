@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Implementation-Title: Zonecraft NPC GLB Compatibility Bridge
+Implementation-Version: 1.0.0

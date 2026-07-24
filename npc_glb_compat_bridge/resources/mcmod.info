@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "zonecraftnpcglbcompat",
+    "name": "Zonecraft NPC GLB Compatibility Bridge",
+    "description": "Restores held StalkerMod weapon rendering and vortex lift for GLB-armored NPC/living entities without modifying StalkerMod or CustomNPCs.",
+    "version": "1.0.0",
+    "mcversion": "1.6.4",
+    "authorList": ["Zonecraft"],
+    "dependencies": ["stalcraftglb", "CustomNpcs", "StalkerMod"]
+  }
+]
