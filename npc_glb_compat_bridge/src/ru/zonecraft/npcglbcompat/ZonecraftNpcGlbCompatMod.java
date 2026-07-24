@@ -6,14 +6,14 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 
 @Mod(
     modid = ZonecraftNpcGlbCompatMod.MODID,
-    name = "Zonecraft NPC GLB Compatibility Bridge",
+    name = "Zonecraft NPC Stalker Compatibility Bridge",
     version = ZonecraftNpcGlbCompatMod.VERSION,
-    dependencies = "after:stalcraftglb;after:CustomNpcs;after:StalkerMod",
+    dependencies = "after:stalcraftglb;after:customnpcs;after:StalkerMod",
     acceptedMinecraftVersions = "[1.6.4]"
 )
 public final class ZonecraftNpcGlbCompatMod {
     public static final String MODID = "zonecraftnpcglbcompat";
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.1.0";
 
     @SidedProxy(
         clientSide = "ru.zonecraft.npcglbcompat.ClientProxy",
@@ -24,6 +24,7 @@ public final class ZonecraftNpcGlbCompatMod {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.registerHandlers();
-        System.out.println("[Zonecraft NPC GLB Compat] 1.0.0 initialized.");
+        System.out.println("[Zonecraft NPC GLB Compat] 1.1.0 initialized: "
+                + "Stalker NPC damage + all-faction vortex physics + held weapon render.");
     }
 }
