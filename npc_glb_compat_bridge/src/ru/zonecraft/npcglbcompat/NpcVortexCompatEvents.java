@@ -11,26 +11,30 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 /**
- * Restores the physical pull of StalkerMod vortex-like anomalies for
- * non-player living entities wearing the one-piece GLB suit.
+ * Reapplies StalkerMod vortex physics after CustomNPC movement AI.
  *
- * CustomNPCs movement code and armor knockback attributes can overwrite the
- * anomaly impulse in the same tick. This handler detects the actual nearby
- * Stalker anomaly block/tile/entity and reapplies its pull after living AI.
- * StalkerMod itself is not modified.
+ * The bridge deliberately ignores faction and GLB armor state. Friendly,
+ * neutral and hostile CustomNPCs receive the same final pull. Players and
+ * non-CustomNPC mobs are left to the original StalkerMod implementation.
  */
 public final class NpcVortexCompatEvents {
     private static final String[] VORTEX_TOKENS = new String[] {
-        "vortex", "voronka", "blackhole", "black_hole",
-        "carousel", "whirl", "funnel", "gravitywell"
+        "vortex", "voronka", "voronca", "blackhole", "black_hole",
+        "carousel", "karusel", "whirl", "funnel", "gravitywell"
     };
     private static final Map<Object, PullState> ACTIVE =
             new WeakHashMap<Object, PullState>();
+    private static int appliedPulls;
 
     @ForgeSubscribe(priority = EventPriority.LOWEST)
     public void onLivingUpdate(LivingUpdateEvent event) {
         Object living = event == null ? null : event.entityLiving;
-        if (living == null || isPlayer(living)) {
+        if (living == null || !isCustomNpc(living)) {
+            return;
+        }
+        if (CompatReflection.booleanField(living,
+                new String[] {"isDead", "field_70128_L"}, false)) {
+            ACTIVE.remove(living);
             return;
         }
 
@@ -41,36 +45,37 @@ public final class NpcVortexCompatEvents {
             return;
         }
 
-        if (CompatReflection.findSuit(living) == null) {
-            ACTIVE.remove(living);
-            return;
-        }
-
-        VortexSource source = findNearestVortex(living, world);
         PullState state = ACTIVE.get(living);
-        if (source != null) {
-            state = new PullState(source.x, source.y, source.z, 8);
-            ACTIVE.put(living, state);
-        } else if (state != null) {
-            state.ticks--;
-            if (state.ticks <= 0) {
-                ACTIVE.remove(living);
+        int ticks = (int) CompatReflection.doubleField(living,
+                new String[] {"ticksExisted", "field_70173_aa"}, 0.0D);
+        int entityId = entityId(living);
+        boolean scanNow = state == null || ((ticks + entityId) % 3 == 0);
+
+        if (scanNow) {
+            VortexSource source = findNearestVortex(living, world);
+            if (source != null) {
+                state = new PullState(source.x, source.y, source.z, 10);
+                ACTIVE.put(living, state);
+            } else if (state != null) {
+                state.ticks -= 3;
+                if (state.ticks <= 0) {
+                    ACTIVE.remove(living);
+                    return;
+                }
+            } else {
                 return;
             }
-        } else {
-            return;
         }
 
-        applyPull(living, state);
+        if (state != null) {
+            applyEqualizedPull(living, state);
+        }
     }
 
     private static VortexSource findNearestVortex(Object living, Object world) {
-        double entityX = CompatReflection.doubleField(living,
-                new String[] {"posX", "field_70165_t"}, 0.0D);
-        double entityY = CompatReflection.doubleField(living,
-                new String[] {"posY", "field_70163_u"}, 0.0D);
-        double entityZ = CompatReflection.doubleField(living,
-                new String[] {"posZ", "field_70161_v"}, 0.0D);
+        double entityX = coordinate(living, "posX", "field_70165_t");
+        double entityY = coordinate(living, "posY", "field_70163_u");
+        double entityZ = coordinate(living, "posZ", "field_70161_v");
 
         int baseX = floor(entityX);
         int baseY = floor(entityY);
@@ -81,13 +86,14 @@ public final class NpcVortexCompatEvents {
         int x;
         int y;
         int z;
-        for (x = baseX - 5; x <= baseX + 5; x++) {
-            for (y = baseY - 2; y <= baseY + 4; y++) {
-                for (z = baseZ - 5; z <= baseZ + 5; z++) {
+        for (x = baseX - 6; x <= baseX + 6; x++) {
+            for (y = baseY - 3; y <= baseY + 5; y++) {
+                for (z = baseZ - 6; z <= baseZ + 6; z++) {
                     Object idValue = CompatReflection.invoke(world,
                             new String[] {"getBlockId", "func_72798_a"},
                             new Class[] {Integer.TYPE, Integer.TYPE, Integer.TYPE},
-                            new Object[] {Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z)});
+                            new Object[] {Integer.valueOf(x), Integer.valueOf(y),
+                                    Integer.valueOf(z)});
                     int blockId = idValue instanceof Number
                             ? ((Number) idValue).intValue() : 0;
                     if (blockId <= 0) {
@@ -98,7 +104,8 @@ public final class NpcVortexCompatEvents {
                     Object tile = CompatReflection.invoke(world,
                             new String[] {"getBlockTileEntity", "func_72796_p"},
                             new Class[] {Integer.TYPE, Integer.TYPE, Integer.TYPE},
-                            new Object[] {Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z)});
+                            new Object[] {Integer.valueOf(x), Integer.valueOf(y),
+                                    Integer.valueOf(z)});
                     if (!isVortexObject(block) && !isVortexObject(tile)) {
                         continue;
                     }
@@ -108,7 +115,7 @@ public final class NpcVortexCompatEvents {
                     double centerZ = z + 0.5D;
                     double distance = distanceSquared(entityX, entityY, entityZ,
                             centerX, centerY, centerZ);
-                    if (distance < bestDistance && distance <= 42.25D) {
+                    if (distance < bestDistance && distance <= 56.25D) {
                         bestDistance = distance;
                         best = new VortexSource(centerX, centerY, centerZ);
                     }
@@ -127,15 +134,12 @@ public final class NpcVortexCompatEvents {
                 if (candidate == living || !isVortexObject(candidate)) {
                     continue;
                 }
-                double xPos = CompatReflection.doubleField(candidate,
-                        new String[] {"posX", "field_70165_t"}, 0.0D);
-                double yPos = CompatReflection.doubleField(candidate,
-                        new String[] {"posY", "field_70163_u"}, 0.0D);
-                double zPos = CompatReflection.doubleField(candidate,
-                        new String[] {"posZ", "field_70161_v"}, 0.0D);
+                double xPos = coordinate(candidate, "posX", "field_70165_t");
+                double yPos = coordinate(candidate, "posY", "field_70163_u");
+                double zPos = coordinate(candidate, "posZ", "field_70161_v");
                 double distance = distanceSquared(entityX, entityY, entityZ,
                         xPos, yPos, zPos);
-                if (distance < bestDistance && distance <= 42.25D) {
+                if (distance < bestDistance && distance <= 56.25D) {
                     bestDistance = distance;
                     best = new VortexSource(xPos, yPos, zPos);
                 }
@@ -180,40 +184,34 @@ public final class NpcVortexCompatEvents {
         return false;
     }
 
-    private static void applyPull(Object living, PullState state) {
-        double x = CompatReflection.doubleField(living,
-                new String[] {"posX", "field_70165_t"}, 0.0D);
-        double y = CompatReflection.doubleField(living,
-                new String[] {"posY", "field_70163_u"}, 0.0D);
-        double z = CompatReflection.doubleField(living,
-                new String[] {"posZ", "field_70161_v"}, 0.0D);
+    private static void applyEqualizedPull(Object living, PullState state) {
+        double x = coordinate(living, "posX", "field_70165_t");
+        double y = coordinate(living, "posY", "field_70163_u");
+        double z = coordinate(living, "posZ", "field_70161_v");
         double dx = state.x - x;
         double dz = state.z - z;
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double safeDistance = Math.max(0.18D, horizontal);
-        double closeness = Math.max(0.0D, 5.5D - horizontal);
-        double attraction = Math.min(0.22D, 0.065D + closeness * 0.022D);
+        double closeness = Math.max(0.0D, 6.3D - horizontal);
+        double attraction = Math.min(0.28D, 0.075D + closeness * 0.026D);
 
-        double motionX = CompatReflection.doubleField(living,
-                new String[] {"motionX", "field_70159_w"}, 0.0D);
-        double motionY = CompatReflection.doubleField(living,
-                new String[] {"motionY", "field_70181_x"}, 0.0D);
-        double motionZ = CompatReflection.doubleField(living,
-                new String[] {"motionZ", "field_70179_y"}, 0.0D);
-
-        motionX += dx / safeDistance * attraction;
-        motionZ += dz / safeDistance * attraction;
-        double minimumLift = Math.min(0.68D, 0.30D + closeness * 0.065D);
-        if (motionY < minimumLift) {
-            motionY = minimumLift;
-        }
+        // Use deterministic final horizontal motion instead of adding to the
+        // original anomaly result. That removes faction-dependent double pull.
+        double motionX = dx / safeDistance * attraction;
+        double motionZ = dz / safeDistance * attraction;
+        double currentY = coordinate(living, "motionY", "field_70181_x");
+        double minimumLift = Math.min(0.82D, 0.32D + closeness * 0.075D);
+        double motionY = Math.max(currentY, minimumLift);
 
         CompatReflection.setDouble(living,
-                new String[] {"motionX", "field_70159_w"}, clamp(motionX, -1.15D, 1.15D));
+                new String[] {"motionX", "field_70159_w"},
+                clamp(motionX, -1.2D, 1.2D));
         CompatReflection.setDouble(living,
-                new String[] {"motionY", "field_70181_x"}, clamp(motionY, 0.22D, 0.78D));
+                new String[] {"motionY", "field_70181_x"},
+                clamp(motionY, 0.24D, 0.86D));
         CompatReflection.setDouble(living,
-                new String[] {"motionZ", "field_70179_y"}, clamp(motionZ, -1.15D, 1.15D));
+                new String[] {"motionZ", "field_70179_y"},
+                clamp(motionZ, -1.2D, 1.2D));
         CompatReflection.setFloat(living,
                 new String[] {"fallDistance", "field_70143_R"}, 0.0F);
         CompatReflection.setBoolean(living,
@@ -229,17 +227,53 @@ public final class NpcVortexCompatEvents {
         CompatReflection.invoke(navigator,
                 new String[] {"clearPathEntity", "func_75515_a"},
                 new Class[0], new Object[0]);
+
+        appliedPulls++;
+        if (appliedPulls <= 10 || appliedPulls % 500 == 0) {
+            System.out.println("[Zonecraft NPC GLB Compat][Vortex] pull="
+                    + appliedPulls + " npc=" + identity(living)
+                    + " distance=" + horizontal);
+        }
     }
 
-    private static boolean isPlayer(Object living) {
-        Class<?> type = living.getClass();
+    private static boolean isCustomNpc(Object living) {
+        Class<?> type = living == null ? null : living.getClass();
         while (type != null && type != Object.class) {
-            if (type.getName().indexOf("EntityPlayer") >= 0) {
+            String name = type.getName().toLowerCase(Locale.ROOT);
+            if (name.equals("noppes.npcs.entity.entitynpcinterface")
+                    || name.equals("noppes.npcs.entitynpcinterface")
+                    || (name.indexOf("noppes.npcs") >= 0
+                    && name.indexOf("entitynpc") >= 0)) {
                 return true;
             }
             type = type.getSuperclass();
         }
         return false;
+    }
+
+    private static String identity(Object value) {
+        Object name = CompatReflection.invoke(value,
+                new String[] {"getCommandSenderName", "func_70023_ak"},
+                new Class[0], new Object[0]);
+        return name == null ? value.getClass().getSimpleName()
+                : String.valueOf(name);
+    }
+
+    private static int entityId(Object value) {
+        Object id = CompatReflection.invoke(value,
+                new String[] {"getEntityId", "func_145782_y"},
+                new Class[0], new Object[0]);
+        if (id instanceof Number) {
+            return ((Number) id).intValue();
+        }
+        Number field = CompatReflection.numberField(value,
+                new String[] {"entityId", "field_70157_k"});
+        return field == null ? System.identityHashCode(value) : field.intValue();
+    }
+
+    private static double coordinate(Object value, String deobf, String srg) {
+        return CompatReflection.doubleField(value,
+                new String[] {deobf, srg}, 0.0D);
     }
 
     private static int floor(double value) {
