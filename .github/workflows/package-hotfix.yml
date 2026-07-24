@@ -1,0 +1,36 @@
+name: Package Full Blender GLB Exporter
+
+on:
+  push:
+    branches:
+      - chatgpt/blender-glb-exporter-0.4.3-fixed
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply ORM performance fix
+        run: python3 tools/patch_full_exporter_performance.py
+      - name: Apply Blender context fix
+        run: python3 tools/patch_full_exporter_context.py
+      - name: Rename final exporter
+        run: mv tools/blender_stalcraft_glb_export_0.4.3_FULL_FIXED.py tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+      - name: Syntax check full exporter
+        run: python3 -m py_compile tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+      - name: Verify context fix and show file size
+        run: |
+          ! grep -n "input(" tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+          ! grep -n "bpy.ops.object.select_all" tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+          grep -n '"version": (0, 4, 5)' tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+          grep -n "def deselect_all_objects" tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+          ls -lh tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+      - name: Upload full standalone exporter
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender_stalcraft_glb_export_0.4.5_FULL_FIXED
+          path: tools/blender_stalcraft_glb_export_0.4.5_FULL_FIXED.py
+          if-no-files-found: error
