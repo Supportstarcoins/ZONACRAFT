@@ -194,12 +194,12 @@ jobs:
           fi
 
           cp "$P/README_RU.md" "$P/release/README_RU.md"
-          (cd "$P/release" && zip -9 "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.zip" \
-            "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar" README_RU.md)
 
-      - name: Upload bridge
+      - name: Upload ready bridge
         uses: actions/upload-artifact@v4
         with:
-          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0
-          path: npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.zip
+          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0-READY
+          path: |
+            npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar
+            npc_glb_compat_bridge/release/README_RU.md
           if-no-files-found: error
