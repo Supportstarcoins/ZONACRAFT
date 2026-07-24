@@ -1,0 +1,205 @@
+name: Build NPC Stalker Compatibility Bridge
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'npc_glb_compat_bridge/**'
+      - '.github/workflows/build-npc-glb-compat-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Create compile-only Forge 1.6.4 stubs
+        shell: bash
+        run: |
+          set -euo pipefail
+          S=npc_glb_compat_bridge/build/stubs
+          mkdir -p "$S/cpw/mods/fml/common/event" \
+                   "$S/cpw/mods/fml/common" \
+                   "$S/net/minecraftforge/common" \
+                   "$S/net/minecraftforge/event/entity/living" \
+                   "$S/net/minecraftforge/event/entity" \
+                   "$S/net/minecraftforge/event" \
+                   "$S/net/minecraftforge/client/event" \
+                   "$S/net/minecraft/client/renderer/entity" \
+                   "$S/net/minecraft/client/model" \
+                   "$S/net/minecraft/entity" \
+                   "$S/org/lwjgl/opengl"
+
+          cat > "$S/cpw/mods/fml/common/Mod.java" <<'EOF'
+          package cpw.mods.fml.common;
+          import java.lang.annotation.*;
+          @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.TYPE)
+          public @interface Mod {
+              String modid(); String name() default ""; String version() default "";
+              String dependencies() default ""; String acceptedMinecraftVersions() default "";
+              @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
+              public @interface EventHandler {}
+          }
+          EOF
+
+          cat > "$S/cpw/mods/fml/common/SidedProxy.java" <<'EOF'
+          package cpw.mods.fml.common;
+          import java.lang.annotation.*;
+          @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.FIELD)
+          public @interface SidedProxy { String clientSide(); String serverSide(); }
+          EOF
+
+          cat > "$S/cpw/mods/fml/common/event/FMLInitializationEvent.java" <<'EOF'
+          package cpw.mods.fml.common.event;
+          public class FMLInitializationEvent {}
+          EOF
+
+          cat > "$S/net/minecraftforge/event/EventPriority.java" <<'EOF'
+          package net.minecraftforge.event;
+          public enum EventPriority { HIGHEST, HIGH, NORMAL, LOW, LOWEST }
+          EOF
+
+          cat > "$S/net/minecraftforge/event/ForgeSubscribe.java" <<'EOF'
+          package net.minecraftforge.event;
+          import java.lang.annotation.*;
+          @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.METHOD)
+          public @interface ForgeSubscribe {
+              EventPriority priority() default EventPriority.NORMAL;
+              boolean receiveCanceled() default false;
+          }
+          EOF
+
+          cat > "$S/net/minecraftforge/event/EventBus.java" <<'EOF'
+          package net.minecraftforge.event;
+          public class EventBus { public void register(Object value) {} }
+          EOF
+
+          cat > "$S/net/minecraftforge/common/MinecraftForge.java" <<'EOF'
+          package net.minecraftforge.common;
+          import net.minecraftforge.event.EventBus;
+          public final class MinecraftForge {
+              public static final EventBus EVENT_BUS = new EventBus();
+          }
+          EOF
+
+          cat > "$S/net/minecraft/entity/EntityLivingBase.java" <<'EOF'
+          package net.minecraft.entity;
+          public class EntityLivingBase {}
+          EOF
+
+          cat > "$S/net/minecraftforge/event/entity/living/LivingEvent.java" <<'EOF'
+          package net.minecraftforge.event.entity.living;
+          import net.minecraft.entity.EntityLivingBase;
+          public class LivingEvent {
+              public EntityLivingBase entityLiving;
+              public static class LivingUpdateEvent extends LivingEvent {}
+          }
+          EOF
+
+          cat > "$S/net/minecraftforge/event/entity/EntityJoinWorldEvent.java" <<'EOF'
+          package net.minecraftforge.event.entity;
+          public class EntityJoinWorldEvent {
+              public Object entity;
+              public Object world;
+              private boolean canceled;
+              public void setCanceled(boolean value) { canceled = value; }
+              public boolean isCanceled() { return canceled; }
+          }
+          EOF
+
+          cat > "$S/net/minecraft/client/renderer/entity/RendererLivingEntity.java" <<'EOF'
+          package net.minecraft.client.renderer.entity;
+          public class RendererLivingEntity {}
+          EOF
+
+          cat > "$S/net/minecraftforge/client/event/RenderLivingEvent.java" <<'EOF'
+          package net.minecraftforge.client.event;
+          import net.minecraft.entity.EntityLivingBase;
+          import net.minecraft.client.renderer.entity.RendererLivingEntity;
+          public class RenderLivingEvent {
+              public EntityLivingBase entity;
+              public RendererLivingEntity renderer;
+              public double x;
+              public double y;
+              public double z;
+              public static class Post extends RenderLivingEvent {}
+          }
+          EOF
+
+          cat > "$S/net/minecraft/client/model/ModelBiped.java" <<'EOF'
+          package net.minecraft.client.model;
+          public class ModelBiped {}
+          EOF
+
+          cat > "$S/net/minecraft/client/model/ModelRenderer.java" <<'EOF'
+          package net.minecraft.client.model;
+          public class ModelRenderer {}
+          EOF
+
+          cat > "$S/org/lwjgl/opengl/GL12.java" <<'EOF'
+          package org.lwjgl.opengl;
+          public final class GL12 { public static final int GL_RESCALE_NORMAL = 32826; }
+          EOF
+
+          cat > "$S/org/lwjgl/opengl/GL11.java" <<'EOF'
+          package org.lwjgl.opengl;
+          public final class GL11 {
+              public static boolean glIsEnabled(int value) { return false; }
+              public static void glPushMatrix() {}
+              public static void glPopMatrix() {}
+              public static void glColor4f(float a,float b,float c,float d) {}
+              public static void glTranslatef(float a,float b,float c) {}
+              public static void glRotatef(float a,float b,float c,float d) {}
+              public static void glScalef(float a,float b,float c) {}
+              public static void glEnable(int value) {}
+              public static void glDisable(int value) {}
+          }
+          EOF
+
+      - name: Compile Java 7 compatible bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=npc_glb_compat_bridge
+          rm -rf "$P/build/classes" "$P/build/jar" "$P/release"
+          mkdir -p "$P/build/classes" "$P/build/jar" "$P/release"
+          find "$P/build/stubs" "$P/src" -name '*.java' -print > "$P/build/sources.txt"
+          javac -source 1.7 -target 1.7 -encoding UTF-8 -Xlint:unchecked \
+            -d "$P/build/classes" @"$P/build/sources.txt"
+
+          mkdir -p "$P/build/jar/ru"
+          cp -R "$P/build/classes/ru/zonecraft" "$P/build/jar/ru/"
+          cp "$P/resources/mcmod.info" "$P/build/jar/mcmod.info"
+
+          JAR="$P/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar"
+          (cd "$P/build/jar" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
+          test "$(unzip -p "$JAR" ru/zonecraft/npcglbcompat/ZonecraftNpcGlbCompatMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
+          unzip -t "$JAR"
+          jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcStalkerWeaponDamageEvents.class'
+          jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcVortexCompatEvents.class'
+          if jar tf "$JAR" | grep -qE '^(cpw/|net/|org/lwjgl/)'; then
+            echo 'Compile stubs leaked into runtime JAR' >&2
+            exit 1
+          fi
+
+          cp "$P/README_RU.md" "$P/release/README_RU.md"
+
+      - name: Upload ready bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0-READY
+          path: |
+            npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar
+            npc_glb_compat_bridge/release/README_RU.md
+          if-no-files-found: error
