@@ -11,8 +11,8 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 /**
- * Restores the physical pull of StalkerMod vortex-like anomalies for
- * non-player living entities wearing the one-piece GLB suit.
+ * Restores the physical pull of StalkerMod vortex-like anomalies for every
+ * non-player living entity, including friendly, neutral and hostile CustomNPCs.
  *
  * CustomNPCs movement code and armor knockback attributes can overwrite the
  * anomaly impulse in the same tick. This handler detects the actual nearby
@@ -38,11 +38,6 @@ public final class NpcVortexCompatEvents {
                 new String[] {"worldObj", "field_70170_p"});
         if (world == null || CompatReflection.booleanField(world,
                 new String[] {"isRemote", "field_72995_K"}, false)) {
-            return;
-        }
-
-        if (CompatReflection.findSuit(living) == null) {
-            ACTIVE.remove(living);
             return;
         }
 
