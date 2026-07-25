@@ -13,7 +13,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 )
 public final class ZonecraftNpcGlbCompatMod {
     public static final String MODID = "zonecraftnpcglbcompat";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
 
     @SidedProxy(
         clientSide = "ru.zonecraft.npcglbcompat.ClientProxy",
@@ -24,8 +24,9 @@ public final class ZonecraftNpcGlbCompatMod {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.registerHandlers();
-        System.out.println("[Zonecraft NPC GLB Compat] 1.2.0 initialized: "
-                + "real ItemWeapon cadence/reload + no ammo-box projectiles + "
-                + "all-faction vortex physics + held weapon render.");
+        System.out.println("[Zonecraft NPC GLB Compat] 1.2.1 initialized: "
+                + "Forge event descriptor fix + real ItemWeapon cadence/reload + "
+                + "no ammo-box projectiles + all-faction vortex physics + "
+                + "held weapon render.");
     }
 }
