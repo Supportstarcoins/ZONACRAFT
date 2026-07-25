@@ -2,8 +2,8 @@
   {
     "modid": "zonecraftnpcglbcompat",
     "name": "Zonecraft NPC Stalker Compatibility Bridge",
-    "description": "Adds server-side damage for CustomNPCs firing StalkerMod weapons, equal vortex pull for friendly/neutral/hostile CustomNPC factions, and held-weapon rendering with GLB suits. Does not modify StalkerMod or CustomNPCs.",
-    "version": "1.1.0",
+    "description": "Makes CustomNPCs fire StalkerMod ItemWeapon shots with the weapon's own cooldown, fire mode, magazine, reload time and pellet count; prevents ammo-box projectiles; keeps all-faction vortex pull and GLB held-weapon rendering.",
+    "version": "1.2.0",
     "mcversion": "1.6.4",
     "authorList": ["Zonecraft"],
     "dependencies": ["stalcraftglb", "customnpcs", "StalkerMod"]
