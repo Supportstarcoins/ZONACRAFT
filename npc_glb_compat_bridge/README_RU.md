@@ -1,41 +1,51 @@
-# Zonecraft NPC Stalker Compatibility Bridge 1.1.0
+# Zonecraft NPC Stalker Compatibility Bridge 1.2.0
 
-Отдельный обычный Forge-мод для Minecraft 1.6.4. Ставится в `mods` и не заменяет классы внутри `stalker-01.jar`, `CustomNPCs` или `stalkerarmor.jar`.
+Отдельный Forge-мост для Minecraft 1.6.4. Он ставится в `mods` и не заменяет классы внутри `stalker-01.jar`, `CustomNPCs` или `stalkerarmor.jar`.
 
-## Что исправляет
+## Что исправлено
 
-- Перехватывает только `ru.stalcraft.entity.EntityBullet`, созданные CustomNPC с оружием `ru.stalcraft.items.ItemWeapon`.
-- Не пропускает сломанную NPC-пулю в ориентированный на игрока сетевой путь StalkerMod.
-- На сервере наносит текущей цели NPC реальный projectile-урон с владельцем-стрелком.
-- Берёт урон из полей пули/оружия StalkerMod; при неизвестной структуре использует безопасный запасной урон `10`.
-- Игроков и их Stalker-пули не изменяет.
+- Предмет из слота **Projectile** больше не вылетает из оружия. Ящики с патронами, магазины и другие предметы не превращаются в снаряды.
+- Projectile-слот остаётся только техническим переключателем штатного дальнего AI CustomNPC.
+- Серверная стрельба управляется характеристиками настоящего `ru.stalcraft.items.ItemWeapon`:
+  - `cooldown` — задержка между выстрелами;
+  - `reload_time` — продолжительность перезарядки;
+  - `cage_size` — ёмкость магазина;
+  - `bullets_count` — число дробин/пуль за один выстрел;
+  - `autoShooting` и текущий `FireMode` — одиночный, автоматический или очередной режим.
+- Для режима очереди мост читает активный `FireMode`; при неизвестной структуре использует очередь по 3 выстрела.
+- После опустошения магазина NPC действительно ждёт штатное время перезарядки оружия, затем продолжает стрелять.
+- Автоматы стреляют непрерывно по своему cooldown, винтовки и дробовики сохраняют длинную задержку, оружие с burst-режимом стреляет очередями.
+- Урон наносится на сервере projectile-источником от самого NPC. Для дробовиков учитывается `damage × bullets_count`.
+- Сломанные NPC `EntityBullet`, которые могли попадать в ориентированный на игрока сетевой путь StalkerMod, подавляются.
 - Воронка одинаково притягивает дружественных, нейтральных и враждебных CustomNPC.
-- Наличие GLB-костюма больше не требуется для физики Воронки.
-- Фракция NPC не проверяется и не влияет на силу притяжения.
-- Игроки и обычные мобы остаются под штатной механикой StalkerMod.
-- На клиенте повторно отрисовывает оружие StalkerMod после скрытия исходного тела GLB-костюмом.
+- На клиенте сохраняется исправленный рендер оружия в руке GLB-брони.
 
 ## Установка
 
-1. Удалить старый `Zonecraft-NPC-GLB-Compatibility-Bridge-1.6.4-1.0.0.jar`, если он был установлен.
-2. Положить `Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar` в папку `mods`.
+1. Удалить старые версии:
+   - `Zonecraft-NPC-GLB-Compatibility-Bridge-1.6.4-1.0.0.jar`;
+   - `Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar`.
+2. Положить `Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.jar` в папку `mods`.
 3. Оставить без изменений:
    - `stalker-01.jar`;
    - CustomNPCs 1.6.4;
    - `stalkerarmor.jar` 0.5.19;
-   - Zonecraft Stalker Armor Stats Bridge и Armor Zone Patch.
-4. Полностью перезапустить Minecraft.
+   - Armor Stats Bridge и Armor Zone Patch.
+4. В Projectile-слоте NPC должен оставаться любой предмет, чтобы CustomNPC включил дальний AI. Этот предмет больше не будет физически выстреливаться.
+5. Полностью перезапустить Minecraft.
 
-После запуска в `ForgeModLoader-client-0.log` должна появиться строка:
+## Проверка
+
+В логе должна появиться строка:
 
 ```text
-[Zonecraft NPC GLB Compat] 1.1.0 initialized: Stalker NPC damage + all-faction vortex physics + held weapon render.
+[Zonecraft NPC GLB Compat] 1.2.0 initialized: real ItemWeapon cadence/reload + no ammo-box projectiles + all-faction vortex physics + held weapon render.
 ```
 
-При выстреле мост пишет строки `[Weapon] ... applied=true`. При срабатывании Воронки появляются строки `[Vortex] ...`.
+При первом обнаружении оружия мост выводит профиль:
 
-## Важно
+```text
+[Weapon] profile ... mode=auto cooldown=2 reload=75 magazine=30 ...
+```
 
-- Мост работает только когда у NPC в руке находится настоящий `ru.stalcraft.items.ItemWeapon` и NPC имеет текущую цель атаки.
-- Стандартный Projectile-слот CustomNPC всё ещё должен быть заполнен, потому что он запускает штатный AI дальнего боя в версии 0.5.19.
-- Старые патчи, которые заменяли Java-файлы внутри StalkerMod, устанавливать нельзя.
+Во время работы будут строки `shot=... applied=true`, `reload=...` и `cancelled item projectile ...`.
