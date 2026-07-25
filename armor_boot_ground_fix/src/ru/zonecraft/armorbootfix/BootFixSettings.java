@@ -6,9 +6,12 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 
 final class BootFixSettings {
+    private static final int CONFIG_VERSION = 2;
+    private static final float OLD_DEFAULT_LIFT = 0.09375F;
+
     static boolean enabled = true;
-    static float baseLiftBlocks = 0.09375F;
-    static float sneakingExtraBlocks = 0.03125F;
+    static float baseLiftBlocks = 0.1875F;
+    static float sneakingExtraBlocks = 0.0625F;
     static boolean applyWhileAirborne = true;
 
     private BootFixSettings() {
@@ -39,18 +42,30 @@ final class BootFixSettings {
             }
         }
 
+        int version = readInt(values, "configVersion", 1);
         enabled = readBoolean(values, "enabled", true);
-        baseLiftBlocks = clamp(readFloat(values, "baseLiftBlocks", 0.09375F), 0.0F, 0.5F);
-        sneakingExtraBlocks = clamp(readFloat(values, "sneakingExtraBlocks", 0.03125F), 0.0F, 0.25F);
+        baseLiftBlocks = clamp(readFloat(values, "baseLiftBlocks", 0.1875F), 0.0F, 0.75F);
+        sneakingExtraBlocks = clamp(readFloat(values, "sneakingExtraBlocks", 0.0625F), 0.0F, 0.25F);
         applyWhileAirborne = readBoolean(values, "applyWhileAirborne", true);
 
+        // Version 1 used 0.09375, which was too small for the heavy suits.
+        // Migrate only untouched old defaults; deliberate user values stay intact.
+        if (version < CONFIG_VERSION
+                && Math.abs(baseLiftBlocks - OLD_DEFAULT_LIFT) < 0.00001F) {
+            baseLiftBlocks = 0.1875F;
+            sneakingExtraBlocks = Math.max(sneakingExtraBlocks, 0.0625F);
+            System.out.println("[Zonecraft Armor Boot Fix] Migrated default lift "
+                    + "from 0.09375 to 0.1875 blocks.");
+        }
+
+        values.setProperty("configVersion", String.valueOf(CONFIG_VERSION));
         values.setProperty("enabled", String.valueOf(enabled));
         values.setProperty("baseLiftBlocks", String.valueOf(baseLiftBlocks));
         values.setProperty("sneakingExtraBlocks", String.valueOf(sneakingExtraBlocks));
         values.setProperty("applyWhileAirborne", String.valueOf(applyWhileAirborne));
         values.setProperty("description",
                 "Raises every ItemStalcraftSuit render so boots do not sink into the floor. "
-                + "0.0625 = one Minecraft model pixel.");
+                + "0.0625 = one Minecraft model pixel. Default 0.1875 = three pixels.");
 
         FileOutputStream output = null;
         try {
@@ -58,7 +73,7 @@ final class BootFixSettings {
                 configDirectory.mkdirs();
             }
             output = new FileOutputStream(file);
-            values.store(output, "Zonecraft Universal Armor Boot Ground Fix 1.0.0");
+            values.store(output, "Zonecraft Universal Armor Boot Ground Fix 1.1.0");
         } catch (Throwable error) {
             System.out.println("[Zonecraft Armor Boot Fix] Could not write config: " + error);
         } finally {
@@ -74,6 +89,18 @@ final class BootFixSettings {
     private static boolean readBoolean(Properties values, String key, boolean fallback) {
         String value = values.getProperty(key);
         return value == null ? fallback : Boolean.parseBoolean(value.trim());
+    }
+
+    private static int readInt(Properties values, String key, int fallback) {
+        String value = values.getProperty(key);
+        if (value == null) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (Throwable ignored) {
+            return fallback;
+        }
     }
 
     private static float readFloat(Properties values, String key, float fallback) {
