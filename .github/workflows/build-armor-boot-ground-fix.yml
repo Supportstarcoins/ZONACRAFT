@@ -134,7 +134,7 @@ jobs:
           cp -R "$P/build/classes/ru/zonecraft" "$P/build/jar/ru/"
           cp "$P/resources/mcmod.info" "$P/build/jar/mcmod.info"
 
-          JAR="$P/release/Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.0.0.jar"
+          JAR="$P/release/Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.1.0.jar"
           (cd "$P/build/jar" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
 
           test "$(unzip -p "$JAR" ru/zonecraft/armorbootfix/ArmorBootGroundFixMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
@@ -147,12 +147,12 @@ jobs:
           fi
 
           cp "$P/README_RU.md" "$P/release/README_RU.md"
-          (cd "$P/release" && zip -9 "Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.0.0.zip" \
-            "Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.0.0.jar" README_RU.md)
+          (cd "$P/release" && zip -9 "Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.1.0.zip" \
+            "Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.1.0.jar" README_RU.md)
 
       - name: Upload boot fix
         uses: actions/upload-artifact@v4
         with:
-          name: Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.0.0
-          path: armor_boot_ground_fix/release/Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.0.0.zip
+          name: Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.1.0
+          path: armor_boot_ground_fix/release/Zonecraft-Universal-Armor-Boot-Ground-Fix-1.6.4-1.1.0.zip
           if-no-files-found: error
