@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "zonecraftarmorbootfix",
+    "name": "Zonecraft Universal Armor Boot Ground Fix",
+    "description": "Raises every STALCRAFT GLB one-piece suit render by a stronger universal offset so boots do not sink into the floor. Works for players and CustomNPCs without modifying the armor mod.",
+    "version": "1.1.0",
+    "mcversion": "1.6.4",
+    "authorList": ["Zonecraft"],
+    "dependencies": ["stalcraftglb"]
+  }
+]
