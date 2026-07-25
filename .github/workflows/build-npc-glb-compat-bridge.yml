@@ -182,11 +182,11 @@ jobs:
           cp -R "$P/build/classes/ru/zonecraft" "$P/build/jar/ru/"
           cp "$P/resources/mcmod.info" "$P/build/jar/mcmod.info"
 
-          JAR="$P/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar"
+          JAR="$P/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.jar"
           (cd "$P/build/jar" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
           test "$(unzip -p "$JAR" ru/zonecraft/npcglbcompat/ZonecraftNpcGlbCompatMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
           unzip -t "$JAR"
-          jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcStalkerWeaponDamageEvents.class'
+          jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcStalkerWeaponControllerEvents.class'
           jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcVortexCompatEvents.class'
           if jar tf "$JAR" | grep -qE '^(cpw/|net/|org/lwjgl/)'; then
             echo 'Compile stubs leaked into runtime JAR' >&2
@@ -194,12 +194,12 @@ jobs:
           fi
 
           cp "$P/README_RU.md" "$P/release/README_RU.md"
+          (cd "$P/release" && zip -9 "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.zip" \
+            "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.jar" README_RU.md)
 
       - name: Upload ready bridge
         uses: actions/upload-artifact@v4
         with:
-          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0-READY
-          path: |
-            npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.1.0.jar
-            npc_glb_compat_bridge/release/README_RU.md
+          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0-READY
+          path: npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.zip
           if-no-files-found: error
