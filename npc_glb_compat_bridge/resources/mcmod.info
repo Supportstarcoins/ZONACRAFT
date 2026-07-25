@@ -1,0 +1,11 @@
+[
+  {
+    "modid": "zonecraftnpcglbcompat",
+    "name": "Zonecraft NPC Stalker Compatibility Bridge",
+    "description": "Fixes Forge 1.6.4 EntityJoinWorldEvent linkage and makes CustomNPCs fire StalkerMod ItemWeapon shots with the weapon's own cooldown, fire mode, magazine, reload time and pellet count; prevents ammo-box projectiles; keeps all-faction vortex pull and GLB held-weapon rendering.",
+    "version": "1.2.1",
+    "mcversion": "1.6.4",
+    "authorList": ["Zonecraft"],
+    "dependencies": ["stalcraftglb", "customnpcs", "StalkerMod"]
+  }
+]
