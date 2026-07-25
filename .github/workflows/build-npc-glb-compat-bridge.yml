@@ -39,6 +39,7 @@ jobs:
                    "$S/net/minecraft/client/renderer/entity" \
                    "$S/net/minecraft/client/model" \
                    "$S/net/minecraft/entity" \
+                   "$S/net/minecraft/world" \
                    "$S/org/lwjgl/opengl"
 
           cat > "$S/cpw/mods/fml/common/Mod.java" <<'EOF'
@@ -93,9 +94,19 @@ jobs:
           }
           EOF
 
+          cat > "$S/net/minecraft/entity/Entity.java" <<'EOF'
+          package net.minecraft.entity;
+          public class Entity {}
+          EOF
+
           cat > "$S/net/minecraft/entity/EntityLivingBase.java" <<'EOF'
           package net.minecraft.entity;
-          public class EntityLivingBase {}
+          public class EntityLivingBase extends Entity {}
+          EOF
+
+          cat > "$S/net/minecraft/world/World.java" <<'EOF'
+          package net.minecraft.world;
+          public class World { public boolean isRemote; }
           EOF
 
           cat > "$S/net/minecraftforge/event/entity/living/LivingEvent.java" <<'EOF'
@@ -109,9 +120,11 @@ jobs:
 
           cat > "$S/net/minecraftforge/event/entity/EntityJoinWorldEvent.java" <<'EOF'
           package net.minecraftforge.event.entity;
+          import net.minecraft.entity.Entity;
+          import net.minecraft.world.World;
           public class EntityJoinWorldEvent {
-              public Object entity;
-              public Object world;
+              public Entity entity;
+              public World world;
               private boolean canceled;
               public void setCanceled(boolean value) { canceled = value; }
               public boolean isCanceled() { return canceled; }
@@ -182,24 +195,28 @@ jobs:
           cp -R "$P/build/classes/ru/zonecraft" "$P/build/jar/ru/"
           cp "$P/resources/mcmod.info" "$P/build/jar/mcmod.info"
 
-          JAR="$P/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.jar"
+          JAR="$P/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.1.jar"
           (cd "$P/build/jar" && jar cfm "../../release/$(basename "$JAR")" "../../MANIFEST.MF" .)
           test "$(unzip -p "$JAR" ru/zonecraft/npcglbcompat/ZonecraftNpcGlbCompatMod.class | od -An -t u1 -N 8 | awk '{print $8}')" = "51"
           unzip -t "$JAR"
           jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcStalkerWeaponControllerEvents.class'
           jar tf "$JAR" | grep -q 'ru/zonecraft/npcglbcompat/NpcVortexCompatEvents.class'
+          javap -classpath "$P/build/classes" -verbose ru.zonecraft.npcglbcompat.NpcStalkerWeaponControllerEvents \
+            | grep -q 'net/minecraftforge/event/entity/EntityJoinWorldEvent.entity:Lnet/minecraft/entity/Entity;'
+          javap -classpath "$P/build/classes" -verbose ru.zonecraft.npcglbcompat.NpcStalkerWeaponControllerEvents \
+            | grep -q 'net/minecraftforge/event/entity/EntityJoinWorldEvent.world:Lnet/minecraft/world/World;'
           if jar tf "$JAR" | grep -qE '^(cpw/|net/|org/lwjgl/)'; then
             echo 'Compile stubs leaked into runtime JAR' >&2
             exit 1
           fi
 
           cp "$P/README_RU.md" "$P/release/README_RU.md"
-          (cd "$P/release" && zip -9 "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.zip" \
-            "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.jar" README_RU.md)
+          (cd "$P/release" && zip -9 "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.1.zip" \
+            "Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.1.jar" README_RU.md)
 
       - name: Upload ready bridge
         uses: actions/upload-artifact@v4
         with:
-          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0-READY
-          path: npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.0.zip
+          name: Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.1-READY
+          path: npc_glb_compat_bridge/release/Zonecraft-NPC-Stalker-Compatibility-Bridge-1.6.4-1.2.1.zip
           if-no-files-found: error
